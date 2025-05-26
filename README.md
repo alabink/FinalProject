@@ -12,7 +12,7 @@ Final Project Summer 2025
 ## 🚀 Công Nghệ Sử Dụng
 
 - **Frontend:** React + Vite  
-- **Backend:** .NET API  
+- **Backend:** NODE JS  
 - **Cơ sở dữ liệu:** MongoDB (Mongoose ODM)  
 - **Thanh toán:** COD, MoMo, VNPAY  
 - **AI Tích Hợp:** Gemini AI (Chatbot & So sánh sản phẩm)
