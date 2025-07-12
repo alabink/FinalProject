@@ -52,13 +52,14 @@ async function getComment(postId) {
 
 class controllerProducts {
     async addProduct(req, res) {
-        const { name, price, images, stock, priceDiscount, attributes, category } = req.body;
-        if (!name || !price || !images || !stock || !attributes || !category) {
+        const { name, brand, price, images, stock, priceDiscount, attributes, category } = req.body;
+        if (!name || !brand || !price || !images || !stock || !attributes || !category) {
             throw new BadRequestError('Vui lòng nhập đầy đủ thông tin');
         }
 
         const data = await modelProduct.create({
             name,
+            brand,
             price,
             priceDiscount,
             images,
@@ -140,9 +141,10 @@ class controllerProducts {
 
     async editProduct(req, res) {
         try {
-            const { _id, name, price, description, category, attributes, images, stock, priceDiscount } = req.body;
+            const { _id, name, brand, price, description, category, attributes, images, stock, priceDiscount } = req.body;
             const product = await modelProduct.findByIdAndUpdate(_id, {
                 name,
+                brand,
                 price,
                 description,
                 category,
