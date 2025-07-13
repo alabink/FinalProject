@@ -190,7 +190,10 @@ class PaymentsController {
                 const products = await Promise.all(
                     order.products.map(async (item) => {
                         const product = await modelProduct.findById(item.productId);
-                        const dataPreview = await modelProductPreview.find({ productId: item.productId });
+                        const dataPreview = await modelProductPreview.find({ 
+                            productId: item.productId, 
+                            orderId: order._id 
+                        });
                         if (!product) {
                             return {
                                 productId: item.productId,

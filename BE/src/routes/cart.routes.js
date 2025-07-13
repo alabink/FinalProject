@@ -90,4 +90,29 @@ router.post('/api/update-info-user-cart', authUser, asyncHandler(controllerCart.
  */
 router.post('/api/apply-coupon', authUser, asyncHandler(controllerCart.applyCoupon));
 
+/**
+ * @swagger
+ * /api/update-cart-quantity:
+ *   post:
+ *     summary: Cập nhật số lượng sản phẩm trong giỏ hàng
+ *     tags: [Cart]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               productId:
+ *                 type: string
+ *                 description: ID sản phẩm
+ *               quantity:
+ *                 type: integer
+ *                 description: Số lượng mới
+ *     responses:
+ *       200:
+ *         description: Cập nhật số lượng thành công
+ */
+router.post('/api/update-cart-quantity', authUser, asyncHandler(controllerCart.updateCartQuantity));
+
 module.exports = router;

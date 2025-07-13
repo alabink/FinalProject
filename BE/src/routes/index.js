@@ -45,6 +45,7 @@ function routes(app) {
     app.post('/api/add-to-cart', cartRoutes);
     app.get('/api/get-cart', cartRoutes);
     app.delete('/api/delete-cart', cartRoutes);
+    app.post('/api/update-cart-quantity', cartRoutes);
     app.post('/api/update-info-user-cart', cartRoutes);
     app.post('/api/apply-coupon', cartRoutes);
 

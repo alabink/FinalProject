@@ -128,6 +128,60 @@ class controllerCart {
         }
     }
 
+    async updateCartQuantity(req, res) {
+        try {
+            const { id } = req.user;
+            const { productId, quantity } = req.body;
+
+            if (!productId || !quantity || quantity < 1) {
+                throw new BadRequestError('Thông tin không hợp lệ');
+            }
+
+            const cart = await modelCart.findOne({ userId: id });
+            if (!cart) {
+                throw new BadRequestError('Không tìm thấy giỏ hàng');
+            }
+
+            const product = await modelProduct.findById(productId);
+            if (!product) {
+                throw new BadRequestError('Không tìm thấy sản phẩm');
+            }
+
+            const cartItemIndex = cart.product.findIndex((item) => item.productId.toString() === productId);
+            if (cartItemIndex === -1) {
+                throw new BadRequestError('Không tìm thấy sản phẩm trong giỏ hàng');
+            }
+
+            const cartItem = cart.product[cartItemIndex];
+            const oldQuantity = cartItem.quantity;
+            const quantityDifference = quantity - oldQuantity;
+
+            // Kiểm tra tồn kho
+            if (quantityDifference > 0 && product.stock < quantityDifference) {
+                throw new BadRequestError('Số lượng trong kho không đủ');
+            }
+
+            // Cập nhật số lượng sản phẩm trong giỏ hàng
+            cartItem.quantity = quantity;
+
+            // Tính lại tổng giá
+            const unitPrice = product.priceDiscount > 0 ? product.priceDiscount : product.price;
+            cart.totalPrice += unitPrice * quantityDifference;
+
+            // Cập nhật tồn kho
+            await modelProduct.updateOne({ _id: productId }, { $inc: { stock: -quantityDifference } });
+
+            await cart.save();
+
+            new OK({ 
+                message: 'Cập nhật số lượng thành công', 
+                metadata: cart 
+            }).send(res);
+        } catch (error) {
+            new BadRequestError(error.message).send(res);
+        }
+    }
+
     async updateInfoUserCart(req, res) {
         const { id } = req.user;
         const { fullName, phone, address } = req.body;
