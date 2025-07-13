@@ -179,9 +179,24 @@ class controllerProducts {
 
     async searchProduct(req, res) {
         const { keyword } = req.query;
+        
+        if (!keyword || keyword.trim() === '') {
+            return new OK({ message: 'Tìm kiếm sản phẩm', metadata: [] }).send(res);
+        }
+        
+        const searchKeyword = keyword.trim();
+        
         const data = await modelProduct.find({
-            name: { $regex: keyword, $options: 'i' },
-        });
+            $or: [
+                { name: { $regex: searchKeyword, $options: 'i' } },
+                { brand: { $regex: searchKeyword, $options: 'i' } },
+                { description: { $regex: searchKeyword, $options: 'i' } },
+                { 'attributes.color': { $regex: searchKeyword, $options: 'i' } },
+                { 'attributes.storage': { $regex: searchKeyword, $options: 'i' } },
+                { 'attributes.ram': { $regex: searchKeyword, $options: 'i' } }
+            ]
+        }).sort({ createdAt: -1 });
+        
         new OK({ message: 'Tìm kiếm sản phẩm', metadata: data }).send(res);
     }
 
