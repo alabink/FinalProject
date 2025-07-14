@@ -41,7 +41,8 @@ Final Project Summer 2025
 
 7. **So sánh sản phẩm bằng AI**  
    - Chọn 2–3 sản phẩm để được AI phân tích, đánh giá và so sánh chi tiết.
-
+8. **Hệ thống gợi ý cá nhân hóa AI**  
+   - Gợi ý sản phẩm cho user dựa trên lịch sử hành vi của người dùng như lượt xem sản phẩm , lượt click và lượt mua từ đó sẽ gợi ý ra sản phẩm mà user có thể quan tâm.
 ---
 
 ## 🛠️ Chức Năng Admin
