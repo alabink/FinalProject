@@ -21,21 +21,23 @@ var upload = multer({
 const { asyncHandler, authUser, authAdmin } = require('../auth/checkAuth');
 
 const controllerUsers = require('../controllers/users.controller');
+
+/**
+ * @swagger
+ * tags:
+ *   name: Users
+ *   description: User management and authentication
+ */
+
 /**
  * @swagger
  * /api/register:
  *   post:
- *     summary: Đăng ký tài khoản
+ *     summary: Register a new user
  *     tags: [Users]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
  *     responses:
  *       200:
- *         description: Đăng ký thành công
+ *         description: User registered successfully
  */
 router.post('/api/register', asyncHandler(controllerUsers.register));
 
@@ -43,17 +45,11 @@ router.post('/api/register', asyncHandler(controllerUsers.register));
  * @swagger
  * /api/login:
  *   post:
- *     summary: Đăng nhập
+ *     summary: Login a user
  *     tags: [Users]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
  *     responses:
  *       200:
- *         description: Đăng nhập thành công
+ *         description: User logged in successfully
  */
 router.post('/api/login', asyncHandler(controllerUsers.login));
 
@@ -61,17 +57,11 @@ router.post('/api/login', asyncHandler(controllerUsers.login));
  * @swagger
  * /api/login-google:
  *   post:
- *     summary: Đăng nhập bằng Google
+ *     summary: Login with Google
  *     tags: [Users]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
  *     responses:
  *       200:
- *         description: Đăng nhập Google thành công
+ *         description: User logged in successfully with Google
  */
 router.post('/api/login-google', asyncHandler(controllerUsers.loginGoogle));
 
@@ -79,11 +69,13 @@ router.post('/api/login-google', asyncHandler(controllerUsers.loginGoogle));
  * @swagger
  * /api/auth:
  *   get:
- *     summary: Xác thực người dùng
+ *     summary: Authenticate a user
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Xác thực thành công
+ *         description: User is authenticated
  */
 router.get('/api/auth', authUser, asyncHandler(controllerUsers.authUser));
 
@@ -91,11 +83,13 @@ router.get('/api/auth', authUser, asyncHandler(controllerUsers.authUser));
  * @swagger
  * /api/logout:
  *   get:
- *     summary: Đăng xuất
+ *     summary: Logout a user
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Đăng xuất thành công
+ *         description: User logged out successfully
  */
 router.get('/api/logout', authUser, asyncHandler(controllerUsers.logout));
 
@@ -103,11 +97,11 @@ router.get('/api/logout', authUser, asyncHandler(controllerUsers.logout));
  * @swagger
  * /api/refresh-token:
  *   get:
- *     summary: Làm mới token
+ *     summary: Refresh authentication token
  *     tags: [Users]
  *     responses:
  *       200:
- *         description: Token mới
+ *         description: Token refreshed successfully
  */
 router.get('/api/refresh-token', asyncHandler(controllerUsers.refreshToken));
 
@@ -115,17 +109,13 @@ router.get('/api/refresh-token', asyncHandler(controllerUsers.refreshToken));
  * @swagger
  * /api/change-password:
  *   post:
- *     summary: Đổi mật khẩu
+ *     summary: Change user password
  *     tags: [Users]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Đổi mật khẩu thành công
+ *         description: Password changed successfully
  */
 router.post('/api/change-password', authUser, asyncHandler(controllerUsers.changePassword));
 
@@ -133,17 +123,11 @@ router.post('/api/change-password', authUser, asyncHandler(controllerUsers.chang
  * @swagger
  * /api/forgot-password:
  *   post:
- *     summary: Gửi email quên mật khẩu
+ *     summary: Send forgot password email
  *     tags: [Users]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
  *     responses:
  *       200:
- *         description: Gửi email thành công
+ *         description: Forgot password email sent successfully
  */
 router.post('/api/forgot-password', asyncHandler(controllerUsers.sendMailForgotPassword));
 
@@ -151,17 +135,11 @@ router.post('/api/forgot-password', asyncHandler(controllerUsers.sendMailForgotP
  * @swagger
  * /api/reset-password:
  *   post:
- *     summary: Xác thực OTP đổi mật khẩu
+ *     summary: Reset password with OTP
  *     tags: [Users]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
  *     responses:
  *       200:
- *         description: Đổi mật khẩu thành công
+ *         description: Password reset successfully
  */
 router.post('/api/reset-password', asyncHandler(controllerUsers.verifyOtp));
 
@@ -169,10 +147,11 @@ router.post('/api/reset-password', asyncHandler(controllerUsers.verifyOtp));
  * @swagger
  * /api/update-info-user:
  *   post:
- *     summary: Cập nhật thông tin người dùng
+ *     summary: Update user information
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
- *       required: true
  *       content:
  *         multipart/form-data:
  *           schema:
@@ -183,7 +162,7 @@ router.post('/api/reset-password', asyncHandler(controllerUsers.verifyOtp));
  *                 format: binary
  *     responses:
  *       200:
- *         description: Cập nhật thành công
+ *         description: User information updated successfully
  */
 router.post('/api/update-info-user', authUser, upload.single('avatar'), asyncHandler(controllerUsers.updateInfoUser));
 
@@ -191,29 +170,28 @@ router.post('/api/update-info-user', authUser, upload.single('avatar'), asyncHan
  * @swagger
  * /api/update-password:
  *   post:
- *     summary: Đổi mật khẩu (có xác thực)
+ *     summary: Update user password (alternative route)
  *     tags: [Users]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Đổi mật khẩu thành công
+ *         description: Password updated successfully
  */
 router.post('/api/update-password', authUser, asyncHandler(controllerUsers.updatePassword));
+
 
 /**
  * @swagger
  * /api/get-admin-stats:
  *   get:
- *     summary: Lấy thống kê admin
+ *     summary: Get admin statistics
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Thống kê admin
+ *         description: Admin stats retrieved successfully
  */
 router.get('/api/get-admin-stats', authAdmin, asyncHandler(controllerUsers.getAdminStats));
 
@@ -221,11 +199,13 @@ router.get('/api/get-admin-stats', authAdmin, asyncHandler(controllerUsers.getAd
  * @swagger
  * /api/get-all-users:
  *   get:
- *     summary: Lấy tất cả user
+ *     summary: Get all users (admin only)
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Danh sách user
+ *         description: All users retrieved successfully
  */
 router.get('/api/get-all-users', authAdmin, asyncHandler(controllerUsers.getAllUser));
 
@@ -233,17 +213,13 @@ router.get('/api/get-all-users', authAdmin, asyncHandler(controllerUsers.getAllU
  * @swagger
  * /api/update-user:
  *   post:
- *     summary: Admin cập nhật user
+ *     summary: Update a user (admin only)
  *     tags: [Users]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Cập nhật user thành công
+ *         description: User updated successfully
  */
 router.post('/api/update-user', authAdmin, asyncHandler(controllerUsers.updateUser));
 
@@ -251,11 +227,13 @@ router.post('/api/update-user', authAdmin, asyncHandler(controllerUsers.updateUs
  * @swagger
  * /admin:
  *   get:
- *     summary: Xác thực admin
+ *     summary: Authenticate an admin
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Xác thực admin thành công
+ *         description: Admin is authenticated
  */
 router.get('/admin', authAdmin, asyncHandler(controllerUsers.authAdmin));
 

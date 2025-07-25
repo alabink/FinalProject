@@ -7,19 +7,22 @@ const controllerProductPreview = require('../controllers/productPreview.controll
 
 /**
  * @swagger
+ * tags:
+ *   name: ProductPreview
+ *   description: Product preview management
+ */
+
+/**
+ * @swagger
  * /api/create-product-preview:
  *   post:
- *     summary: Tạo product preview mới
+ *     summary: Create a product preview
  *     tags: [ProductPreview]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Tạo product preview thành công
+ *         description: Product preview created successfully
  */
 router.post('/api/create-product-preview', authUser, asyncHandler(controllerProductPreview.createProductPreview));
 

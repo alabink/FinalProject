@@ -17,9 +17,10 @@ class CommentController {
 
         if (parentId) {
             const parentComment = await Comment.findById(parentId);
-            if (!parentComment || parentComment.parentId) {
-                throw new BadRequestError('Chỉ được trả lời comment cấp 1.');
+            if (!parentComment) {
+                throw new BadRequestError('Không tìm thấy bình luận gốc.');
             }
+            // Cho phép phản hồi tất cả các bình luận, không chỉ bình luận cấp 1
         }
 
         const newComment = await Comment.create({

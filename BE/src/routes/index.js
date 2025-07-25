@@ -6,6 +6,13 @@ const categoryRoutes = require('./category.routes');
 const couponRoutes = require('./coupon.routes');
 const productPreviewRoutes = require('./productPreview.routes');
 const commentRoutes = require('./comment.routes');
+const recommendationRoutes = require('./recommendation.routes');
+const { askQuestion } = require('../utils/Chatbot');
+
+// Thêm các import cần thiết cho tính năng upload ảnh
+const uploadCloud = require('../config/cloudinary.config');
+const controllerProducts = require('../controllers/products.controller');
+const { asyncHandler } = require('../auth/checkAuth');
 
 function routes(app) {
     app.post('/api/register', userRoutes);
@@ -33,7 +40,8 @@ function routes(app) {
     app.get('/api/filter-product-category', categoryRoutes);
 
     app.post('/api/add-product', productRoutes);
-    app.post('/api/upload-image', productRoutes);
+    // Sử dụng middleware uploadCloud để xử lý multipart/form-data trước khi vào controller
+    app.post('/api/upload-image', uploadCloud.array('images'), asyncHandler(controllerProducts.uploadImage));
     app.get('/api/products', productRoutes);
     app.get('/api/product', productRoutes);
     app.get('/api/all-product', productRoutes);
@@ -41,6 +49,8 @@ function routes(app) {
     app.delete('/api/delete-product', productRoutes);
     app.get('/api/search-product', productRoutes);
     app.get('/api/filter-product', productRoutes);
+    app.post('/api/compare-products', productRoutes);
+    app.post('/api/quick-compare-products', productRoutes);
 
     app.post('/api/add-to-cart', cartRoutes);
     app.get('/api/get-cart', cartRoutes);
@@ -67,6 +77,21 @@ function routes(app) {
     app.post('/api/create-product-preview', productPreviewRoutes);
 
     app.post('/api/create-comment', commentRoutes);
+
+    // Recommendation routes
+    app.use('/api', recommendationRoutes);
+
+    // Chatbot route
+    app.post('/chat', async (req, res) => {
+        try {
+            const { question, userId } = req.body;
+            const answer = await askQuestion(question, userId);
+            res.json(answer);
+        } catch (error) {
+            console.error('Error in chat route:', error);
+            res.status(500).json('Xin lỗi, đã có lỗi xảy ra trong quá trình xử lý câu hỏi của bạn.');
+        }
+    });
 }
 
 module.exports = routes;
