@@ -8,7 +8,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { requestRegister, requestLoginGoogle } from '../../Config/request';
 import { useStore } from '../../hooks/useStore';
-import { SUCCESS_TYPES } from '../../Components/ProgressSuccess/SuccessProgress';
+import { SUCCESS_TYPES } from '../../../Components/ProgressSuccess/SuccessProgress';
 import heroImage from '../../assets/images/hero-image.png';
 
 const cx = classNames.bind(styles);
