@@ -9,6 +9,19 @@ const modelCart = new Schema(
             {
                 productId: { type: String, required: true, ref: 'product' },
                 quantity: { type: Number, required: true },
+                variantId: { type: String },
+                sku: { type: String },
+                variantInfo: {
+                    color: {
+                        name: { type: String },
+                        code: { type: String },
+                        image: { type: String }
+                    },
+                    storage: {
+                        size: { type: String },
+                        displayName: { type: String }
+                    }
+                }
             },
         ],
         totalPrice: { type: Number, require: true },

@@ -7,19 +7,22 @@ const controllerCart = require('../controllers/cart.controller');
 
 /**
  * @swagger
+ * tags:
+ *   name: Cart
+ *   description: Cart management
+ */
+
+/**
+ * @swagger
  * /api/add-to-cart:
  *   post:
- *     summary: Thêm sản phẩm vào giỏ hàng
+ *     summary: Add a product to the cart
  *     tags: [Cart]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Thêm vào giỏ hàng thành công
+ *         description: Product added to cart successfully
  */
 router.post('/api/add-to-cart', authUser, asyncHandler(controllerCart.addToCart));
 
@@ -27,11 +30,13 @@ router.post('/api/add-to-cart', authUser, asyncHandler(controllerCart.addToCart)
  * @swagger
  * /api/get-cart:
  *   get:
- *     summary: Lấy giỏ hàng của người dùng
+ *     summary: Get the user's cart
  *     tags: [Cart]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Lấy giỏ hàng thành công
+ *         description: The user's cart
  */
 router.get('/api/get-cart', authUser, asyncHandler(controllerCart.getCart));
 
@@ -39,36 +44,41 @@ router.get('/api/get-cart', authUser, asyncHandler(controllerCart.getCart));
  * @swagger
  * /api/delete-cart:
  *   delete:
- *     summary: Xóa sản phẩm khỏi giỏ hàng
+ *     summary: Delete a product from the cart
  *     tags: [Cart]
- *     parameters:
- *       - in: query
- *         name: productId
- *         schema:
- *           type: string
- *         required: true
- *         description: ID sản phẩm cần xóa
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Xóa sản phẩm khỏi giỏ hàng thành công
+ *         description: Product deleted from cart successfully
  */
 router.delete('/api/delete-cart', authUser, asyncHandler(controllerCart.deleteProductCart));
 
 /**
  * @swagger
- * /api/update-info-user-cart:
+ * /api/update-cart-quantity:
  *   post:
- *     summary: Cập nhật thông tin người nhận trong giỏ hàng
+ *     summary: Update the quantity of a product in the cart
  *     tags: [Cart]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Cập nhật thông tin thành công
+ *         description: Cart quantity updated successfully
+ */
+router.post('/api/update-cart-quantity', authUser, asyncHandler(controllerCart.updateCartQuantity));
+
+/**
+ * @swagger
+ * /api/update-info-user-cart:
+ *   post:
+ *     summary: Update user information in the cart
+ *     tags: [Cart]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User information in cart updated successfully
  */
 router.post('/api/update-info-user-cart', authUser, asyncHandler(controllerCart.updateInfoUserCart));
 
@@ -76,17 +86,13 @@ router.post('/api/update-info-user-cart', authUser, asyncHandler(controllerCart.
  * @swagger
  * /api/apply-coupon:
  *   post:
- *     summary: Áp dụng mã giảm giá cho giỏ hàng
+ *     summary: Apply a coupon to the cart
  *     tags: [Cart]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Áp dụng mã giảm giá thành công
+ *         description: Coupon applied successfully
  */
 router.post('/api/apply-coupon', authUser, asyncHandler(controllerCart.applyCoupon));
 

@@ -16,6 +16,7 @@ class controllerCoupon {
             nameCoupon,
             discount,
             quantity,
+            initialQuantity: quantity,
             startDate,
             endDate,
             minPrice,
@@ -88,6 +89,7 @@ class controllerCoupon {
             endDate,
             minPrice,
             productUsed,
+            ...(quantity && { initialQuantity: quantity })
         });
         return res.status(200).json({ message: 'Cập nhật mã giảm giá thành công' });
     }

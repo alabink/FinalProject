@@ -1,0 +1,281 @@
+.wrapper {
+    width: 100%;
+    padding: 2rem 0;
+    background-color: #fff;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    
+    .title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        
+        h2 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #2a2a2a;
+            position: relative;
+            
+            .method-name {
+                font-size: 0.9rem;
+                color: #666;
+                font-weight: normal;
+                margin-left: 5px;
+            }
+        }
+        
+        .icon {
+            font-size: 24px;
+            padding: 8px;
+            border-radius: 50%;
+            
+            &.personalized {
+                color: #6c5ce7;
+                background-color: rgba(108, 92, 231, 0.1);
+                animation: pulse 2s infinite;
+            }
+            
+            &.popular {
+                color: #ff4d4f;
+                background-color: rgba(255, 77, 79, 0.1);
+            }
+            
+            &.fallback {
+                color: #52c41a;
+                background-color: rgba(82, 196, 26, 0.1);
+            }
+        }
+    }
+    
+    .method-selector {
+        display: flex;
+        align-items: center;
+        
+        :global {
+            .ant-select {
+                font-size: 0.9rem;
+                
+                .ant-select-selector {
+                    border-radius: 8px;
+                    border: 1px solid #e8e8e8;
+                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+                }
+                
+                .ant-select-arrow {
+                    color: #1890ff;
+                }
+                
+                &:hover .ant-select-selector {
+                    border-color: #1890ff;
+                }
+                
+                .ant-select-selection-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+            }
+        }
+    }
+    
+    .view-all {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: #1890ff;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        
+        &:hover {
+            color: #40a9ff;
+            transform: translateX(3px);
+        }
+    }
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(108, 92, 231, 0.3);
+    }
+    70% {
+        box-shadow: 0 0 0 6px rgba(108, 92, 231, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(108, 92, 231, 0);
+    }
+}
+
+@keyframes slideUp {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 1.5rem;
+    
+    .product-item {
+        opacity: 0; // Start hidden for animation
+        animation: slideUp 0.6s ease forwards;
+        transition: all 0.3s ease;
+        
+        &:hover {
+            transform: translateY(-5px);
+        }
+    }
+}
+
+// Stagger animation by using nth-child delays (up to 10 items)
+.products-grid .product-item:nth-child(1) { animation-delay: 0.05s; }
+.products-grid .product-item:nth-child(2) { animation-delay: 0.1s; }
+.products-grid .product-item:nth-child(3) { animation-delay: 0.15s; }
+.products-grid .product-item:nth-child(4) { animation-delay: 0.2s; }
+.products-grid .product-item:nth-child(5) { animation-delay: 0.25s; }
+.products-grid .product-item:nth-child(6) { animation-delay: 0.3s; }
+.products-grid .product-item:nth-child(7) { animation-delay: 0.35s; }
+.products-grid .product-item:nth-child(8) { animation-delay: 0.4s; }
+
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+    width: 100%;
+}
+
+.empty {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    width: 100%;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+}
+
+.products-slider {
+    .swiper {
+        width: 100%;
+        padding-bottom: 20px;
+    }
+
+    .swiper-slide {
+        box-sizing: border-box;
+    }
+
+    .product-item {
+        opacity: 0;
+        animation: slideUp 0.6s ease forwards;
+        transition: transform 0.3s ease;
+    }
+
+    // When slide comes into view, Swiper adds class .swiper-slide-active or similar.
+    .swiper-slide-active .product-item,
+    .swiper-slide-next .product-item,
+    .swiper-slide-prev .product-item {
+        opacity: 0; // Reset to allow animation when slide enters
+        animation: slideUp 0.6s ease forwards;
+    }
+
+    .swiper-button-next,
+    .swiper-button-prev {
+        color: #667eea;
+        &:after {
+            font-size: 20px;
+            font-weight: 700;
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .wrapper {
+        padding: 1.5rem 0;
+    }
+    
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        
+        .title {
+            h2 {
+                font-size: 1.5rem;
+            }
+            
+            .icon {
+                font-size: 20px;
+                padding: 6px;
+            }
+        }
+        
+        .method-selector {
+            width: 100%;
+            
+            :global {
+                .ant-select {
+                    width: 100% !important;
+                }
+            }
+        }
+    }
+    
+    .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .wrapper {
+        padding: 1rem 0;
+    }
+    
+    .header {
+        .title {
+            h2 {
+                font-size: 1.25rem;
+                
+                .method-name {
+                    font-size: 0.75rem;
+                    display: block;
+                    margin-left: 0;
+                    margin-top: 5px;
+                }
+            }
+            
+            .icon {
+                font-size: 18px;
+                padding: 5px;
+            }
+        }
+        
+        .view-all {
+            font-size: 0.8rem;
+        }
+    }
+    
+    .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 0.8rem;
+    }
+} 

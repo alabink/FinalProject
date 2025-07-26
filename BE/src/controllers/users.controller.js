@@ -15,46 +15,49 @@ const CryptoJS = require('crypto-js');
 const jwt = require('jsonwebtoken');
 const { jwtDecode } = require('jwt-decode');
 
+// Default avatar URL
+const DEFAULT_AVATAR_URL = 'https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/man-user-color-icon.png';
+
 class controllerUsers {
     async register(req, res) {
-        const { fullName, email, password, phone } = req.body;
+        const { firstname, lastname, email, password, phone } = req.body;
 
-        if (!fullName || !email || !password || !phone) {
-            throw new BadRequestError('Vui lòng nhập đày đủ thông tin');
+        if (!firstname || !lastname || !email || !password || !phone) {
+            throw new BadRequestError('Vui lòng nhập đầy đủ thông tin');
         }
         const user = await modelUser.findOne({ email });
         if (user) {
-            throw new BadRequestError('Người dùng đã tồn tại');
+            throw new BadRequestError('Email đã được sử dụng');
         } else {
             const saltRounds = 10;
             const salt = bcrypt.genSaltSync(saltRounds);
             const passwordHash = bcrypt.hashSync(password, salt);
             const newUser = await modelUser.create({
-                fullName,
+                fullName: `${firstname} ${lastname}`,
                 email,
                 password: passwordHash,
                 typeLogin: 'email',
                 phone,
+                avatar: DEFAULT_AVATAR_URL, // Set default avatar
             });
             await newUser.save();
             await createApiKey(newUser._id);
             const token = await createToken({ id: newUser._id });
             const refreshToken = await createRefreshToken({ id: newUser._id });
             res.cookie('token', token, {
-                httpOnly: true, // Chặn truy cập từ JavaScript (bảo mật hơn)
-                secure: true, // Chỉ gửi trên HTTPS (để đảm bảo an toàn)
-                sameSite: 'Strict', // Chống tấn công CSRF
+                httpOnly: true,
+                secure: true,
+                sameSite: 'Strict',
                 maxAge: 15 * 60 * 1000, // 15 phút
             });
 
             res.cookie('logged', 1, {
-                httpOnly: false, // Chặn truy cập từ JavaScript (bảo mật hơn)
-                secure: true, // Chỉ gửi trên HTTPS (để đảm bảo an toàn)
-                sameSite: 'Strict', // Chống tấn công CSRF
+                httpOnly: false,
+                secure: true,
+                sameSite: 'Strict',
                 maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
             });
 
-            // Đặt cookie HTTP-Only cho refreshToken (tùy chọn)
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
                 secure: true,
@@ -151,6 +154,7 @@ class controllerUsers {
                 fullName: dataToken.name,
                 email: dataToken.email,
                 typeLogin: 'google',
+                avatar: DEFAULT_AVATAR_URL,
             });
             await newUser.save();
             await createApiKey(newUser._id);
@@ -405,74 +409,225 @@ class controllerUsers {
     }
 
     async sendMailForgotPassword(req, res) {
-        const { email } = req.body;
-        if (!email) {
-            throw new BadRequestError('Vui lòng nhập email');
-        }
-        const user = await modelUser.findOne({ email });
-        if (!user) {
-            throw new BadRequestError('Không tìm thấy người dùng');
-        }
-        const otp = await otpGenerator.generate(6, {
-            digits: true,
-            lowerCaseAlphabets: false,
-            upperCaseAlphabets: false,
-            specialChars: false,
-        });
+        try {
+            const { email } = req.body;
+            if (!email) {
+                throw new BadRequestError('Vui lòng nhập email');
+            }
+            
+            const user = await modelUser.findOne({ email });
+            if (!user) {
+                throw new BadRequestError('Email không tồn tại trong hệ thống');
+            }
 
-        const findOtp = await modelOtp.findOne({ email });
-        if (findOtp) {
-            await modelOtp.deleteOne({ email });
+            // Check if user is Google account
+            if (user.typeLogin === 'google') {
+                throw new BadRequestError('Tài khoản Google không thể đặt lại mật khẩu');
+            }
+            
+            const otp = otpGenerator.generate(6, {
+                digits: true,
+                lowerCaseAlphabets: false,
+                upperCaseAlphabets: false,
+                specialChars: false,
+            });
+
+            // Delete existing OTP for this email
+            await modelOtp.deleteMany({ email });
+
+            const saltRounds = 10;
+            const salt = bcrypt.genSaltSync(saltRounds);
+            const passwordHash = bcrypt.hashSync(otp, salt);
+
+            // Create new OTP with type field
+            await modelOtp.create({ 
+                email: user.email, 
+                otp: passwordHash,
+                type: 'forgot_password'
+            });
+            
+            try {
+                // Send email
+                await MailForgotPassword(email, otp);
+                
+                // Create token with shorter expiration time
+                const SECRET_KEY = process.env.JWT_SECRET || process.env.SECRET_KEY_JWT || '123456';
+                const token = jwt.sign({ email: user.email }, SECRET_KEY, {
+                    expiresIn: '5m', // 5 minutes to match OTP expiration
+                });
+                
+                res.cookie('tokenOtp', token, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: 'Strict',
+                    maxAge: 5 * 60 * 1000, // 5 minutes
+                });
+                
+                new OK({ message: 'Mã OTP đã được gửi đến email của bạn. Vui lòng kiểm tra email!' }).send(res);
+            } catch (emailError) {
+                console.error('Error sending email:', emailError);
+                
+                // Delete the OTP since email failed
+                await modelOtp.deleteMany({ email });
+                
+                throw new BadRequestError('Không thể gửi email. Vui lòng thử lại sau!');
+            }
+        } catch (error) {
+            console.error('Error in sendMailForgotPassword:', error);
+            
+            // If it's already a BadRequestError, pass it through
+            if (error instanceof BadRequestError) {
+                throw error;
+            }
+            
+            // Otherwise, wrap it in a BadRequestError
+            throw new BadRequestError(error.message || 'Đã xảy ra lỗi. Vui lòng thử lại sau!');
         }
-
-        const saltRounds = 10;
-        const salt = bcrypt.genSaltSync(saltRounds);
-        const passwordHash = bcrypt.hashSync(otp, salt);
-
-        await modelOtp.create({ email: user.email, otp: passwordHash });
-        await MailForgotPassword(email, otp);
-        const token = jwt.sign({ email: user.email }, '123456', {
-            expiresIn: '15m',
-        });
-        res.cookie('tokenOtp', token, {
-            httpOnly: false,
-            secure: true,
-            sameSite: 'Strict',
-            maxAge: 15 * 60 * 1000,
-        });
-        new OK({ message: 'Vui lòng kiểm tra email' }).send(res);
     }
 
     async verifyOtp(req, res) {
         const { otp, newPassword } = req.body;
         const token = req.cookies.tokenOtp;
-        const { email } = jwt.verify(token, '123456');
+        
+        if (!token) {
+            throw new BadRequestError('Phiên làm việc đã hết hạn. Vui lòng thử lại!');
+        }
 
         if (!otp || !newPassword) {
             throw new BadRequestError('Vui lòng nhập đầy đủ thông tin');
         }
-        const findOtp = await modelOtp.findOne({ email: email });
-        if (!findOtp) {
-            throw new BadRequestError('Không tìm thấy otp');
+
+        if (newPassword.length < 6) {
+            throw new BadRequestError('Mật khẩu phải có ít nhất 6 ký tự');
         }
+
+        try {
+            // Verify JWT token
+            const SECRET_KEY = process.env.JWT_SECRET || process.env.SECRET_KEY_JWT || '123456';
+            const decoded = jwt.verify(token, SECRET_KEY);
+            const { email } = decoded;
+
+            // Find OTP record
+            const findOtp = await modelOtp.findOne({ 
+                email: email, 
+                type: 'forgot_password' 
+            });
+            
+        if (!findOtp) {
+                // Clear invalid cookie
+                res.clearCookie('tokenOtp');
+                throw new BadRequestError('Mã OTP đã hết hạn hoặc không hợp lệ. Vui lòng yêu cầu mã mới!');
+        }
+
+            // Verify OTP
         const checkOtp = bcrypt.compareSync(otp, findOtp.otp);
         if (!checkOtp) {
-            throw new BadRequestError('OTP không chính xác');
+                throw new BadRequestError('Mã OTP không chính xác. Vui lòng kiểm tra lại!');
         }
+
+            // Hash new password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
+            
+            // Update password
         await modelUser.updateOne({ email }, { password: hashedPassword });
-        await modelOtp.deleteOne({ email });
+            
+            // Clean up: delete OTP and clear cookie
+            await modelOtp.deleteOne({ email, type: 'forgot_password' });
+            res.clearCookie('tokenOtp');
+            
+            new OK({ message: 'Đặt lại mật khẩu thành công! Bạn có thể đăng nhập bằng mật khẩu mới.' }).send(res);
+            
+        } catch (error) {
+            // Clear cookie on any error
         res.clearCookie('tokenOtp');
-        new OK({ message: 'Cập nhật mật khẩu thành công' }).send(res);
+            
+            if (error.name === 'TokenExpiredError') {
+                // Clean up expired OTP
+                try {
+                    const decoded = jwt.decode(token);
+                    if (decoded && decoded.email) {
+                        await modelOtp.deleteMany({ email: decoded.email });
+                    }
+                } catch (decodeError) {
+                    console.error('Error decoding expired token:', decodeError);
+                }
+                throw new BadRequestError('Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới!');
+            }
+            
+            if (error.name === 'JsonWebTokenError') {
+                throw new BadRequestError('Phiên làm việc không hợp lệ. Vui lòng thử lại!');
+            }
+            
+            // Re-throw BadRequestError as is
+            if (error instanceof BadRequestError) {
+                throw error;
+            }
+            
+            throw new BadRequestError('Có lỗi xảy ra khi đặt lại mật khẩu. Vui lòng thử lại!');
+        }
     }
 
     async updateInfoUser(req, res) {
+        try {
         const { id } = req.user;
-        const avatar = req.file.filename;
         const { fullName, phone, email, address } = req.body;
-        await modelUser.updateOne({ _id: id }, { fullName, phone, email, address, avatar });
-        new OK({ message: 'Cập nhật thông tin người dùng thành công' }).send(res);
+
+            // Validate required fields
+            if (!fullName || !phone || !email) {
+                throw new BadRequestError('Vui lòng nhập đầy đủ thông tin bắt buộc');
+            }
+
+            // Validate phone number
+            const phoneRegex = /^[0-9]{10}$/;
+            if (!phoneRegex.test(phone)) {
+                throw new BadRequestError('Số điện thoại không hợp lệ');
+            }
+
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                throw new BadRequestError('Email không hợp lệ');
+            }
+
+            // Check if email exists for other users
+            const existingUser = await modelUser.findOne({ 
+                email, 
+                _id: { $ne: id } 
+            });
+            if (existingUser) {
+                throw new BadRequestError('Email đã được sử dụng bởi tài khoản khác');
+            }
+
+            // Prepare update data
+            const updateData = {
+                fullName: fullName.trim(),
+                phone: phone.trim(),
+                email: email.trim(),
+                address: address ? address.trim() : ''
+            };
+
+            // Add avatar if uploaded
+            if (req.file) {
+                updateData.avatar = req.file.filename;
+            }
+
+            // Update user info
+            await modelUser.updateOne(
+                { _id: id },
+                updateData
+            );
+
+            new OK({ 
+                message: 'Cập nhật thông tin thành công',
+                metadata: updateData
+            }).send(res);
+        } catch (error) {
+            if (error instanceof BadRequestError) {
+                throw error;
+            }
+            throw new BadRequestError('Có lỗi xảy ra khi cập nhật thông tin');
+        }
     }
 
     async updatePassword(req, res) {

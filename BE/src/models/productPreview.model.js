@@ -6,6 +6,7 @@ const modelProductPreview = new Schema(
     {
         productId: { type: Schema.Types.ObjectId, require: true, ref: 'product' },
         userId: { type: Schema.Types.ObjectId, require: true, ref: 'user' },
+        orderId: { type: Schema.Types.ObjectId, require: true, ref: 'payments' },
         rating: { type: Number, require: true },
         comment: { type: String, require: true },
     },

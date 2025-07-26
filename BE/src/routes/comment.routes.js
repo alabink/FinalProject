@@ -7,19 +7,22 @@ const controllerComment = require('../controllers/comment.controller');
 
 /**
  * @swagger
+ * tags:
+ *   name: Comments
+ *   description: Comment management
+ */
+
+/**
+ * @swagger
  * /api/create-comment:
  *   post:
- *     summary: Tạo bình luận mới
- *     tags: [Comment]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
+ *     summary: Create a new comment
+ *     tags: [Comments]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Tạo bình luận thành công
+ *         description: Comment created successfully
  */
 router.post('/api/create-comment', authUser, asyncHandler(controllerComment.createComment));
 

@@ -7,6 +7,7 @@ const modelCoupon = new Schema(
         nameCoupon: { type: String, required: true },
         discount: { type: Number, required: true },
         quantity: { type: Number, required: true },
+        initialQuantity: { type: Number },
         startDate: { type: Date, required: true },
         endDate: { type: Date, required: true },
         productUsed: [{ type: String, required: true }],

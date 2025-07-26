@@ -1,35 +1,25 @@
 const express = require('express');
 const router = express.Router();
-
-const multer = require('multer');
-const path = require('path');
-
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'src/uploads/images');
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + path.extname(file.originalname));
-    },
-});
-
-var upload = multer({
-    storage: storage,
-    limits: { fileSize: 500 * 1024 * 1024 },
-});
-
 const { asyncHandler, authUser, authAdmin } = require('../auth/checkAuth');
-
 const controllerProducts = require('../controllers/products.controller');
+const uploadCloud = require('../config/cloudinary.config');
+
+/**
+ * @swagger
+ * tags:
+ *   name: Products
+ *   description: Product management
+ */
 
 /**
  * @swagger
  * /api/add-product:
  *   post:
- *     summary: Thêm sản phẩm mới
+ *     summary: Add a new product (admin only)
  *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
- *       required: true
  *       content:
  *         multipart/form-data:
  *           schema:
@@ -42,19 +32,19 @@ const controllerProducts = require('../controllers/products.controller');
  *                   format: binary
  *     responses:
  *       200:
- *         description: Sản phẩm đã được thêm thành công
+ *         description: Product added successfully
  */
-router.post('/api/add-product', authAdmin, upload.array('images'), asyncHandler(controllerProducts.addProduct));
+router.post('/api/add-product', authAdmin, uploadCloud.array('images'), asyncHandler(controllerProducts.addProduct));
 
 /**
  * @swagger
  * /api/products:
  *   get:
- *     summary: Lấy danh sách sản phẩm
+ *     summary: Get a list of products
  *     tags: [Products]
  *     responses:
  *       200:
- *         description: Danh sách sản phẩm
+ *         description: A list of products
  */
 router.get('/api/products', asyncHandler(controllerProducts.getProducts));
 
@@ -62,18 +52,17 @@ router.get('/api/products', asyncHandler(controllerProducts.getProducts));
  * @swagger
  * /api/product:
  *   get:
- *     summary: Lấy chi tiết sản phẩm theo ID
+ *     summary: Get a product by ID
  *     tags: [Products]
  *     parameters:
  *       - in: query
  *         name: id
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
- *         description: ID sản phẩm
  *     responses:
  *       200:
- *         description: Chi tiết sản phẩm
+ *         description: A single product
  */
 router.get('/api/product', asyncHandler(controllerProducts.getProductById));
 
@@ -81,10 +70,9 @@ router.get('/api/product', asyncHandler(controllerProducts.getProductById));
  * @swagger
  * /api/upload-image:
  *   post:
- *     summary: Upload hình ảnh sản phẩm
+ *     summary: Upload product images
  *     tags: [Products]
  *     requestBody:
- *       required: true
  *       content:
  *         multipart/form-data:
  *           schema:
@@ -97,19 +85,19 @@ router.get('/api/product', asyncHandler(controllerProducts.getProductById));
  *                   format: binary
  *     responses:
  *       200:
- *         description: Upload thành công
+ *         description: Images uploaded successfully
  */
-router.post('/api/upload-image', upload.array('images'), asyncHandler(controllerProducts.uploadImage));
+router.post('/api/upload-image', uploadCloud.array('images'), asyncHandler(controllerProducts.uploadImage));
 
 /**
  * @swagger
  * /api/all-product:
  *   get:
- *     summary: Lấy tất cả sản phẩm (không phân trang)
+ *     summary: Get all products
  *     tags: [Products]
  *     responses:
  *       200:
- *         description: Danh sách tất cả sản phẩm
+ *         description: All products
  */
 router.get('/api/all-product', asyncHandler(controllerProducts.getAllProduct));
 
@@ -117,17 +105,11 @@ router.get('/api/all-product', asyncHandler(controllerProducts.getAllProduct));
  * @swagger
  * /api/edit-product:
  *   post:
- *     summary: Chỉnh sửa sản phẩm
+ *     summary: Edit a product
  *     tags: [Products]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
  *     responses:
  *       200:
- *         description: Sản phẩm đã được chỉnh sửa thành công
+ *         description: Product edited successfully
  */
 router.post('/api/edit-product', asyncHandler(controllerProducts.editProduct));
 
@@ -135,18 +117,17 @@ router.post('/api/edit-product', asyncHandler(controllerProducts.editProduct));
  * @swagger
  * /api/delete-product:
  *   delete:
- *     summary: Xóa sản phẩm
+ *     summary: Delete a product
  *     tags: [Products]
  *     parameters:
  *       - in: query
  *         name: id
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
- *         description: ID sản phẩm cần xóa
  *     responses:
  *       200:
- *         description: Sản phẩm đã được xóa thành công
+ *         description: Product deleted successfully
  */
 router.delete('/api/delete-product', asyncHandler(controllerProducts.deleteProduct));
 
@@ -154,18 +135,17 @@ router.delete('/api/delete-product', asyncHandler(controllerProducts.deleteProdu
  * @swagger
  * /api/search-product:
  *   get:
- *     summary: Tìm kiếm sản phẩm
+ *     summary: Search for products
  *     tags: [Products]
  *     parameters:
  *       - in: query
  *         name: keyword
+ *         required: true
  *         schema:
  *           type: string
- *         required: false
- *         description: Từ khóa tìm kiếm
  *     responses:
  *       200:
- *         description: Kết quả tìm kiếm sản phẩm
+ *         description: A list of matching products
  */
 router.get('/api/search-product', asyncHandler(controllerProducts.searchProduct));
 
@@ -173,30 +153,60 @@ router.get('/api/search-product', asyncHandler(controllerProducts.searchProduct)
  * @swagger
  * /api/filter-product:
  *   get:
- *     summary: Lọc sản phẩm
+ *     summary: Filter products
  *     tags: [Products]
- *     parameters:
- *       - in: query
- *         name: category
- *         schema:
- *           type: string
- *         required: false
- *         description: Lọc theo danh mục
- *       - in: query
- *         name: priceMin
- *         schema:
- *           type: number
- *         required: false
- *         description: Giá tối thiểu
- *       - in: query
- *         name: priceMax
- *         schema:
- *           type: number
- *         required: false
- *         description: Giá tối đa
  *     responses:
  *       200:
- *         description: Kết quả lọc sản phẩm
+ *         description: A list of filtered products
  */
 router.get('/api/filter-product', asyncHandler(controllerProducts.filterProduct));
+
+/**
+ * @swagger
+ * /api/product-variants:
+ *   get:
+ *     summary: Get product variants
+ *     tags: [Products]
+ *     responses:
+ *       200:
+ *         description: Product variants
+ */
+router.get('/api/product-variants', asyncHandler(controllerProducts.getProductVariants));
+
+/**
+ * @swagger
+ * /api/variant-by-selection:
+ *   get:
+ *     summary: Get a variant by selection
+ *     tags: [Products]
+ *     responses:
+ *       200:
+ *         description: A product variant
+ */
+router.get('/api/variant-by-selection', asyncHandler(controllerProducts.getVariantBySelection));
+
+/**
+ * @swagger
+ * /api/compare-products:
+ *   post:
+ *     summary: Compare products
+ *     tags: [Products]
+ *     responses:
+ *       200:
+ *         description: Comparison result
+ */
+router.post('/api/compare-products', asyncHandler(controllerProducts.compareProducts));
+
+/**
+ * @swagger
+ * /api/quick-compare-products:
+ *   post:
+ *     summary: Quick compare products
+ *     tags: [Products]
+ *     responses:
+ *       200:
+ *         description: Quick comparison result
+ */
+router.post('/api/quick-compare-products', asyncHandler(controllerProducts.quickCompareProducts));
+
 module.exports = router;
