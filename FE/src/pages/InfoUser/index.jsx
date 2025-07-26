@@ -2,7 +2,7 @@ import classNames from 'classnames/bind';
 import styles from './InfoUser.module.scss';
 import Header from '../../Components/Header/Header';
 import { UserOutlined, ShoppingOutlined, LockOutlined, LogoutOutlined } from '@ant-design/icons';
-import VerifiedBadge from '../../Components/VerifiedBadge/VerifiedBadge';
+import VerifiedBadge from '../../../Components/VerifiedBadge/VerifiedBadge';
 
 import InfoUser from './Components/InfoUser/InfoUser';
 import { useStore } from '../../hooks/useStore';
