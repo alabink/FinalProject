@@ -3,8 +3,7 @@ Final Project Summer 2025
 # 📱 Phone E-Commerce Website
 
 **Techify** Một website thương mại điện tử bán điện thoại hiện đại, tích hợp AI hỗ trợ tư vấn và so sánh sản phẩm, với tính năng quản trị và thanh toán tiện lợi.
-![techify](https://github.com/user-attachments/assets/4ac673dd-088c-49df-91fc-f420a6a49d58)
-
+![techify] <img width="1000" height="1000" alt="logo" src="https://github.com/user-attachments/assets/70ba87c7-ea54-40ea-97e5-e70720e496fd" />
 
 
 ---
