@@ -1,0 +1,117 @@
+.variant-manager {
+    margin: 24px 0;
+    font-family: var(--font-family);
+    .ant-card {
+        box-shadow: var(--shadow-lg);
+        border-radius: 20px;
+        background: var(--bg-card);
+        border: 2px solid rgba(37,99,235,0.10);
+        transition: var(--transition-base);
+        &:hover {
+            box-shadow: 0 12px 32px -8px var(--primary-color);
+            transform: translateY(-4px) scale(1.01);
+        }
+    }
+    .ant-card-small .ant-card-body {
+        padding: 20px;
+    }
+    .ant-card-actions {
+        border-top: 1.5px solid var(--bg-light);
+        .ant-card-actions > li {
+            margin: 10px 0;
+            &:hover {
+                color: var(--primary-color);
+            }
+        }
+    }
+    .ant-modal-content {
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+        background: var(--bg-card);
+    }
+    .ant-form-item-label > label {
+        font-weight: 700;
+        color: var(--text-color);
+    }
+    .ant-upload-list-picture-card .ant-upload-list-item {
+        border-radius: 8px;
+    }
+    .ant-input-group {
+        display: flex;
+        align-items: center;
+    }
+    .ant-tag {
+        border-radius: 8px;
+        font-weight: 600;
+        background: var(--bg-light);
+        color: var(--primary-color);
+        border: none;
+    }
+}
+
+.variant-card {
+    transition: all 0.3s cubic-bezier(.4,0,.2,1);
+    border-radius: 16px;
+    background: var(--bg-light);
+    box-shadow: var(--shadow);
+    &:hover {
+        transform: translateY(-3px) scale(1.01);
+        box-shadow: 0 8px 24px -6px var(--primary-color);
+    }
+}
+
+.upload-area {
+    border: 2px dashed var(--primary-color);
+    border-radius: 10px;
+    padding: 24px;
+    text-align: center;
+    background: var(--bg-light);
+    color: var(--primary-color);
+    transition: border-color 0.3s;
+    &:hover {
+        border-color: var(--secondary-color);
+        background: var(--bg-card);
+    }
+}
+
+.price-display {
+    .discount-price {
+        color: var(--danger-color);
+        font-weight: bold;
+        font-size: 15px;
+    }
+    .original-price {
+        color: var(--text-light);
+        text-decoration: line-through;
+        font-size: 13px;
+    }
+    .regular-price {
+        color: var(--danger-color);
+        font-weight: bold;
+        font-size: 15px;
+    }
+}
+
+.sku-input-group {
+    .ant-btn {
+        border-left: none;
+        height: 36px;
+        font-size: 13px;
+        border-radius: 0 8px 8px 0;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        color: #fff;
+        font-weight: 700;
+    }
+}
+
+@media (max-width: 768px) {
+    .variant-manager {
+        margin: 12px 0;
+        .ant-modal {
+            margin: 0 10px;
+        }
+        .ant-modal-content {
+            margin: 0;
+        }
+    }
+} 
