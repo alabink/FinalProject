@@ -1,0 +1,977 @@
+// Luxury Design System
+$gold: #d4af37;
+$deep-gold: #b39429;
+$pale-gold: #f2e8c9;
+$luxury-navy: #0c122c;
+$luxury-black: #0a0a0a;
+$luxury-white: #fcfcfc;
+$luxury-gray: #969696;
+
+// Elegant Font Styles
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@200;300;400;500;600;700&display=swap');
+
+.aboutContainer {
+  width: 100%;
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: $luxury-black;
+  background: $luxury-white;
+    position: relative;
+  
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+    height: 100%;
+    background-image: 
+      radial-gradient(circle at 20% 30%, rgba($gold, 0.02) 0%, rgba($gold, 0) 70%),
+      radial-gradient(circle at 80% 70%, rgba($gold, 0.03) 0%, rgba($gold, 0) 70%);
+    z-index: -1;
+    }
+    
+  // Luxury Parallax Hero Section
+  .parallaxHero {
+    position: relative;
+    height: 70vh;
+    min-height: 500px;
+    max-height: 600px;
+    overflow: hidden;
+    margin-bottom: 60px;
+    
+    .particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+    }
+    
+  .luxuryHeroSection {
+      position: relative;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, $luxury-black 0%, $luxury-navy 100%);
+      z-index: 2;
+    
+    // Gold decorative line
+    .luxuryDecorLine {
+      position: absolute;
+      top: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 70%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, $gold, transparent);
+      
+      &::before, &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: $gold;
+        transform: translate(-50%, -50%);
+      }
+      
+      &::before {
+        left: 0;
+      }
+      
+      &::after {
+        right: -5px;
+      }
+    }
+    
+    .heroContent {
+      position: relative;
+      z-index: 3;
+      text-align: center;
+      padding: 0 20px;
+      max-width: 1000px;
+      
+      .brandMark {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 30px;
+        position: relative;
+        
+      &::before {
+        content: '';
+        position: absolute;
+          top: 0;
+        left: 50%;
+          transform: translateX(-50%);
+          width: 60px;
+          height: 60px;
+          border: 1px solid rgba($gold, 0.4);
+          border-radius: 50%;
+      }
+      
+      &::after {
+        content: '';
+        position: absolute;
+          top: 15px;
+        left: 50%;
+          transform: translateX(-50%);
+          width: 90px;
+          height: 90px;
+          border: 1px solid rgba($gold, 0.2);
+          border-radius: 50%;
+        }
+      }
+      
+      h1 {
+        margin-bottom: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        
+        .elegantLogo {
+          max-width: 220px;
+          height: auto;
+          margin-bottom: 20px;
+        }
+        
+        .luxuryDivider {
+          width: 60px;
+          height: 1px;
+          background-color: $gold;
+          margin: 0 0 20px;
+        position: relative;
+        
+          &::before, &::after {
+          content: '';
+          position: absolute;
+            top: 50%;
+            width: 3px;
+            height: 3px;
+            background-color: $gold;
+            border-radius: 50%;
+            transform: translateY(-50%);
+          }
+          
+          &::before {
+            left: -5px;
+          }
+          
+          &::after {
+            right: -5px;
+        }
+      }
+      
+        .luxuryTagline {
+          font-size: 1.1rem;
+          letter-spacing: 5px;
+          text-transform: uppercase;
+        font-weight: 300;
+          color: $gold;
+        }
+      }
+      
+      .luxuryDescription {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 1.6rem;
+        font-weight: 300;
+        font-style: italic;
+        color: $luxury-white;
+        opacity: 0.9;
+        max-width: 700px;
+        margin: 0 auto;
+        line-height: 1.5;
+        letter-spacing: 1px;
+      }
+      
+      .luxuryOrnament {
+        width: 30px;
+        height: 30px;
+        margin: 40px auto 0;
+        position: relative;
+        
+        &::before {
+          content: '';
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          top: 0;
+          left: 0;
+          border: 1px solid rgba($gold, 0.5);
+          transform: rotate(45deg);
+        }
+        
+        &::after {
+          content: '';
+          position: absolute;
+          width: 80%;
+          height: 80%;
+          top: 10%;
+          left: 10%;
+          background: rgba($gold, 0.15);
+          transform: rotate(45deg);
+        }
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .heroContent {
+        h1 {
+          .elegantLogo {
+            max-width: 180px;
+          }
+          
+          .luxuryTagline {
+            font-size: 0.9rem;
+            letter-spacing: 3px;
+          }
+        }
+        
+        .luxuryDescription {
+          font-size: 1.3rem;
+        }
+      }
+    }
+  }
+  
+  // Luxury Content Sections
+  .luxuryContent {
+    width: 100%;
+    padding: 0 5% 50px;
+  }
+  
+  // Luxury Section Styling
+  .luxurySection {
+    display: flex;
+    gap: 50px;
+    margin-bottom: 100px;
+    position: relative;
+    align-items: center;
+    
+    .sectionDecor {
+      position: absolute;
+      width: 150px;
+      height: 150px;
+      top: -40px;
+      left: -75px;
+      border: 1px solid rgba($gold, 0.1);
+      z-index: -1;
+      transform: rotate(45deg);
+    
+    &::before {
+      content: '';
+      position: absolute;
+        width: 80%;
+        height: 80%;
+        top: 10%;
+        left: 10%;
+        border: 1px solid rgba($gold, 0.2);
+      }
+    }
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      margin-bottom: 70px;
+      gap: 40px;
+    }
+    
+    &:nth-child(even) {
+      flex-direction: row-reverse;
+      
+      @media (max-width: 768px) {
+        flex-direction: column;
+      }
+    }
+    
+    .luxurySectionContent {
+      flex: 1;
+      
+      .luxuryHeading {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 2.8rem;
+        color: $luxury-black;
+        margin-bottom: 30px;
+        font-weight: 400;
+        position: relative;
+        display: inline-block;
+        
+        .luxuryAccent {
+          position: absolute;
+          left: -25px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 15px;
+          height: 1px;
+          background: $gold;
+        
+          &::before {
+          content: '';
+          position: absolute;
+            left: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: $gold;
+        }
+      }
+      }
+      
+      .luxuryParagraph {
+        font-size: 1rem;
+        line-height: 1.8;
+        color: #333;
+        max-width: 550px;
+        font-weight: 300;
+        letter-spacing: 0.5px;
+        position: relative;
+        padding-left: 20px;
+        border-left: 1px solid rgba($gold, 0.3);
+        text-align: left;
+      }
+    }
+    
+    .luxuryImageContainer {
+      flex: 1;
+      
+      .luxuryImageWrapper {
+        width: 100%;
+        height: 100%;
+        min-height: 350px;
+        position: relative;
+        
+        .imageAccent {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          border: 1px solid rgba($gold, 0.3);
+          top: 15px;
+          left: 15px;
+          z-index: -1;
+        }
+        
+        .luxuryImage {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          filter: contrast(1.05) brightness(0.98);
+          transition: transform 1s ease, filter 1s ease;
+          
+          &:hover {
+            transform: scale(1.02);
+            filter: contrast(1.1) brightness(1);
+          }
+        }
+      }
+    }
+  }
+  
+  // Luxury Mission Section
+  .luxuryMissionSection {
+    margin-bottom: 100px;
+    padding: 60px 40px;
+    background: linear-gradient(135deg, rgba($luxury-navy, 0.95) 0%, rgba($luxury-black, 0.95) 100%);
+      position: relative;
+    overflow: hidden;
+    
+    // Gold pattern background
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23d4af37' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+      z-index: 0;
+    }
+    
+    // Decorative gold accents
+      &::after {
+        content: '';
+        position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba($gold, 0.1) 0%, rgba($gold, 0) 70%);
+      transform: translate(30%, 30%);
+    }
+    
+    .luxuryHeadingCentered {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.8rem;
+      color: $luxury-white;
+      margin-bottom: 30px;
+      font-weight: 400;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+      
+      .luxuryAccentCenter {
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 1px;
+        background: $gold;
+        
+        &::before, &::after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          width: 3px;
+          height: 3px;
+          border-radius: 50%;
+          background: $gold;
+          transform: translate(-50%, -50%);
+        }
+        
+        &::before {
+          left: 0;
+        }
+        
+        &::after {
+          left: 100%;
+        }
+      }
+    }
+    
+    .luxuryDescriptionCentered {
+      font-family: 'Cormorant Garamond', serif;
+      text-align: center;
+      font-size: 1.5rem;
+      color: $luxury-white;
+      opacity: 0.9;
+      max-width: 800px;
+      margin: 0 auto 40px;
+      line-height: 1.5;
+      font-weight: 300;
+      font-style: italic;
+      letter-spacing: 0.5px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .luxuryCards {
+      display: flex;
+      gap: 25px;
+      flex-wrap: nowrap;
+      position: relative;
+      z-index: 1;
+      
+      @media (max-width: 1024px) {
+        flex-wrap: wrap;
+        justify-content: center;
+        
+        .luxuryCard {
+          flex: 0 0 calc(50% - 15px);
+        }
+      }
+      
+      @media (max-width: 768px) {
+        .luxuryCard {
+          flex: 0 0 100%;
+        }
+      }
+      
+      .luxuryCard {
+        flex: 1 1 0;
+        background-color: rgba($luxury-white, 0.03);
+        padding: 40px 20px;
+        text-align: center;
+        position: relative;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba($gold, 0.1);
+        overflow: hidden;
+        transition: all 0.6s ease;
+        
+        // Decorative border accent
+        .cardDecor {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 30%;
+          height: 1px;
+          background: linear-gradient(90deg, $gold, transparent);
+        
+          &::after {
+          content: '';
+          position: absolute;
+            top: 0;
+          left: 0;
+            height: 30%;
+            width: 1px;
+            background: linear-gradient(0deg, transparent, $gold);
+          }
+        }
+        
+        &:hover {
+          background-color: rgba($luxury-white, 0.05);
+          border-color: rgba($gold, 0.3);
+          
+          .luxuryCardIcon {
+            .iconWrapper {
+              transform: rotate(45deg);
+              background: $gold;
+              color: $luxury-navy;
+            }
+          }
+        }
+        
+        .luxuryCardIcon {
+          margin-bottom: 20px;
+          
+          .iconWrapper {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 50px;
+            height: 50px;
+            border: 1px solid $gold;
+            color: $gold;
+            font-size: 1.5rem;
+            transition: all 0.6s ease;
+          }
+        }
+        
+        h3 {
+          font-family: 'Montserrat', sans-serif;
+          font-size: 1.1rem;
+          color: $luxury-white;
+          margin-bottom: 15px;
+          font-weight: 400;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+        }
+        
+        p {
+          color: rgba($luxury-white, 0.7);
+          font-size: 0.9rem;
+          line-height: 1.7;
+          font-weight: 300;
+        }
+      }
+    }
+  }
+  
+  // Luxury Values Section
+  .luxuryValuesSection {
+    margin-bottom: 100px;
+    padding: 60px 40px;
+    background-color: $luxury-white;
+    position: relative;
+    overflow: hidden;
+    
+    .luxuryPatternOverlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4af37' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      z-index: -1;
+    }
+    
+    .luxuryValuesContainer {
+      display: flex;
+      gap: 25px;
+      flex-wrap: wrap;
+      justify-content: center;
+      
+      .luxuryValueItem {
+        flex: 0 0 calc(33.333% - 20px);
+      text-align: center;
+        padding: 35px 20px;
+      position: relative;
+        transition: transform 0.6s ease;
+        
+        @media (max-width: 1024px) {
+          flex: 0 0 calc(50% - 15px);
+      }
+        
+        @media (max-width: 768px) {
+          flex: 0 0 100%;
+        }
+        
+        &:hover {
+          transform: translateY(-8px);
+          
+          .luxuryValueIcon {
+            border-color: $gold;
+        
+            &::before {
+              transform: translate(-50%, -50%) scale(1.2);
+              opacity: 0;
+            }
+          }
+        }
+        
+        .luxuryValueIcon {
+          width: 60px;
+          height: 60px;
+          margin: 0 auto 25px;
+          border: 1px solid rgba($gold, 0.3);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          position: relative;
+          transition: all 0.6s ease;
+          
+          &::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            border: 1px solid rgba($gold, 0.1);
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            transition: all 0.6s ease;
+          }
+          
+          span {
+            font-family: 'Cormorant Garamond', serif;
+            color: $luxury-black;
+            font-size: 1.8rem;
+            font-weight: 600;
+          }
+        }
+        
+        h3 {
+          font-family: 'Montserrat', sans-serif;
+          font-size: 1.1rem;
+          color: $luxury-black;
+          margin-bottom: 20px;
+          font-weight: 500;
+          letter-spacing: 1px;
+          position: relative;
+          display: inline-block;
+          
+          &::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 25px;
+            height: 1px;
+            background: $gold;
+          }
+        }
+        
+        p {
+          color: rgba($luxury-black, 0.7);
+          font-size: 0.9rem;
+          line-height: 1.7;
+          font-weight: 300;
+          margin: 0 auto;
+          max-width: 280px;
+        }
+      }
+    }
+  }
+  
+  // Luxury Timeline Section
+  .luxuryHistorySection {
+    margin-bottom: 100px;
+    position: relative;
+    padding: 60px 0;
+    
+    .historyDecorLeft, .historyDecorRight {
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      border: 1px solid rgba($gold, 0.1);
+      z-index: -1;
+    }
+    
+    .historyDecorLeft {
+      top: 40px;
+      left: -90px;
+      transform: rotate(45deg);
+    }
+    
+    .historyDecorRight {
+      bottom: 40px;
+      right: -90px;
+      transform: rotate(45deg);
+    }
+    
+    .luxuryTimeline {
+      position: relative;
+      max-width: 900px;
+      margin: 50px auto 0;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 1px;
+        height: 100%;
+        background: linear-gradient(to bottom, $gold, rgba($gold, 0.3));
+        
+        @media (max-width: 768px) {
+          left: 40px;
+        }
+      }
+      
+      .luxuryTimelineItem {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        margin-bottom: 60px;
+        position: relative;
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+        
+        @media (max-width: 768px) {
+          justify-content: flex-start;
+          margin-left: 40px;
+        }
+        
+        .timelinePoint {
+          position: relative;
+          width: 20px;
+          height: 20px;
+          z-index: 2;
+          margin: 0 30px;
+          
+          @media (max-width: 768px) {
+            margin: 0 30px 0 0;
+          }
+          
+          .timelineDot {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 8px;
+            height: 8px;
+            background: $gold;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: 2;
+            box-shadow: 0 0 0 8px rgba($gold, 0.1);
+            transition: all 0.4s ease;
+            
+            &::before {
+              content: '';
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%) scale(0);
+              width: 20px;
+              height: 20px;
+              border: 1px solid rgba($gold, 0.5);
+              border-radius: 50%;
+              transition: transform 0.4s ease;
+            }
+          }
+          
+          &:hover {
+            .timelineDot {
+              transform: translate(-50%, -50%) scale(1.2);
+              
+              &::before {
+                transform: translate(-50%, -50%) scale(1);
+              }
+            }
+          }
+        }
+        
+        .luxuryTimelineContent {
+          width: 350px;
+          padding: 25px 30px;
+          background-color: $luxury-white;
+          border: 1px solid rgba($gold, 0.1);
+          transition: all 0.5s ease;
+          position: relative;
+          
+          &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 40%;
+            height: 1px;
+            background: linear-gradient(90deg, $gold, transparent);
+          }
+          
+          &:hover {
+            transform: translateY(-5px);
+            border-color: rgba($gold, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+          }
+          
+          h3 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.1rem;
+            color: $gold;
+            margin-bottom: 10px;
+            font-weight: 500;
+            letter-spacing: 1px;
+          }
+          
+          p {
+            color: rgba($luxury-black, 0.8);
+            font-size: 0.9rem;
+            line-height: 1.7;
+            font-weight: 300;
+            margin: 0;
+          }
+          
+          @media (max-width: 768px) {
+            width: calc(100% - 60px);
+          }
+        }
+        
+        &:nth-child(even) {
+          .luxuryTimelineContent {
+            &::before {
+              left: auto;
+              right: 0;
+              background: linear-gradient(90deg, transparent, $gold);
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  // Luxury CTA Section
+  .luxuryCTASection {
+    padding: 60px 40px;
+    text-align: center;
+    background: linear-gradient(135deg, $luxury-navy 0%, $luxury-black 100%);
+    margin-bottom: 60px;
+    color: $luxury-white;
+    position: relative;
+    overflow: hidden;
+    
+    .ctaDecor {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      height: 400px;
+      border: 1px solid rgba($gold, 0.1);
+      border-radius: 50%;
+    
+    &::before {
+      content: '';
+      position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 550px;
+        height: 550px;
+        border: 1px solid rgba($gold, 0.05);
+        border-radius: 50%;
+      }
+    }
+    
+    .ctaHeading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.8rem;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+      font-weight: 400;
+    }
+    
+    .ctaDescription {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem;
+      max-width: 650px;
+      margin: 0 auto 35px;
+      font-weight: 300;
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+      font-style: italic;
+    }
+    
+    .luxuryButton {
+      padding: 16px 35px;
+      background-color: transparent;
+      color: $luxury-white;
+      font-size: 0.9rem;
+      font-weight: 300;
+      letter-spacing: 2px;
+      border: 1px solid $gold;
+      cursor: pointer;
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+      display: inline-flex;
+      align-items: center;
+      transition: all 0.4s ease;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: $gold;
+        transform: scaleX(0);
+        transform-origin: right;
+        transition: transform 0.4s ease;
+        z-index: -1;
+      }
+      
+      &:hover {
+        color: $luxury-black;
+        
+        &::before {
+          transform: scaleX(1);
+          transform-origin: left;
+        }
+        
+        .buttonIcon {
+          transform: translateX(5px);
+        }
+      }
+      
+      .buttonText {
+        margin-right: 10px;
+      }
+      
+      .buttonIcon {
+        transition: transform 0.3s ease;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      padding: 50px 25px;
+      
+      .ctaHeading {
+        font-size: 2.2rem;
+      }
+      
+      .ctaDescription {
+        font-size: 1.1rem;
+      }
+    }
+  }
+} 
+
+.luxuryImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  max-height: 400px;
+} 

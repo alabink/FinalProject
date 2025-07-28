@@ -1,0 +1,314 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.notification {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 9999;
+    background: #10b981;
+    border-radius: 12px;
+    padding: 12px 16px 16px 16px;
+    min-width: 280px;
+    max-width: 400px;
+    box-shadow: 
+        0 10px 25px -5px rgba(0, 0, 0, 0.1),
+        0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    transform: translateX(-120%) translateY(20px) scale(0.9);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    pointer-events: auto;
+    overflow: hidden;
+    
+    // Success style (default)
+    &.success {
+        background: #10b981;
+        box-shadow: 
+            0 10px 25px -5px rgba(16, 185, 129, 0.2),
+            0 8px 10px -6px rgba(16, 185, 129, 0.15);
+    }
+    
+    // Failure/Error style
+    &.failure {
+        background: #ef4444;
+        box-shadow: 
+            0 10px 25px -5px rgba(239, 68, 68, 0.2),
+            0 8px 10px -6px rgba(239, 68, 68, 0.15);
+    }
+    
+    // Warning style
+    &.warning {
+        background: #f59e0b;
+        box-shadow: 
+            0 10px 25px -5px rgba(245, 158, 11, 0.2),
+            0 8px 10px -6px rgba(245, 158, 11, 0.15);
+    }
+    
+    // Info style
+    &.info {
+        background: #3b82f6;
+        box-shadow: 
+            0 10px 25px -5px rgba(59, 130, 246, 0.2),
+            0 8px 10px -6px rgba(59, 130, 246, 0.15);
+    }
+    
+    &.visible {
+        transform: translateX(0) translateY(0) scale(1);
+        opacity: 1;
+        animation: slideInBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    &.closing {
+        transform: translateX(-120%) translateY(20px) scale(0.8);
+        opacity: 0;
+        animation: slideOutFade 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53);
+    }
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.icon {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: white;
+    font-size: 16px;
+    opacity: 0;
+    animation: fadeInUp 0.4s ease-out 0.2s both;
+    
+    svg {
+        animation: iconPulse 0.6s ease-out 0.3s both;
+    }
+}
+
+.message {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: white;
+    margin: 0;
+    line-height: 1.4;
+    flex: 1;
+    opacity: 0;
+    animation: fadeInRight 0.4s ease-out 0.3s both;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    margin-left: 8px;
+    flex-shrink: 0;
+    opacity: 0;
+    animation: fadeInScale 0.3s ease-out 0.5s both;
+    font-size: 12px;
+    
+    &:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: scale(1.1);
+    }
+    
+    &:active {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(0.95);
+    }
+}
+
+.progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 0 0 12px 12px;
+    transition: width 0.05s linear;
+    animation: progressBarSlideIn 0.3s ease-out 0.4s both;
+    
+    &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        animation: shimmer 2s linear infinite;
+    }
+}
+
+// Progress bar styles for different notification types
+.notification.success .progress-bar {
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.notification.failure .progress-bar {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.notification.warning .progress-bar {
+    background: rgba(255, 255, 255, 0.85);
+}
+
+.notification.info .progress-bar {
+    background: rgba(255, 255, 255, 0.85);
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes slideInBounce {
+    0% {
+        transform: translateX(-120%) translateY(20px) scale(0.8);
+        opacity: 0;
+    }
+    60% {
+        transform: translateX(5px) translateY(-2px) scale(1.02);
+        opacity: 1;
+    }
+    80% {
+        transform: translateX(-2px) translateY(1px) scale(0.98);
+    }
+    100% {
+        transform: translateX(0) translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutFade {
+    0% {
+        transform: translateX(0) translateY(0) scale(1);
+        opacity: 1;
+    }
+    30% {
+        transform: translateX(-10px) translateY(5px) scale(0.95);
+        opacity: 0.7;
+    }
+    100% {
+        transform: translateX(-120%) translateY(20px) scale(0.8);
+        opacity: 0;
+    }
+}
+
+@keyframes progressBarSlideIn {
+    0% {
+        transform: scaleX(0);
+        transform-origin: left;
+    }
+    100% {
+        transform: scaleX(1);
+        transform-origin: left;
+    }
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInRight {
+    0% {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInScale {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes iconPulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+    .notification {
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+        min-width: auto;
+        max-width: none;
+        padding: 10px 12px 14px 12px;
+    }
+    
+    .message {
+        font-size: 13px;
+    }
+    
+    .icon {
+        font-size: 14px;
+    }
+    
+    .close-button {
+        font-size: 10px;
+    }
+    
+    .progress-bar {
+        height: 2px;
+    }
+}
+
+@media (max-width: 480px) {
+    .notification {
+        bottom: 5px;
+        left: 5px;
+        right: 5px;
+        padding: 8px 10px 12px 10px;
+    }
+    
+    .message {
+        font-size: 12px;
+    }
+    
+    .progress-bar {
+        height: 2px;
+    }
+} 
