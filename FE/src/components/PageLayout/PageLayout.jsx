@@ -22,7 +22,7 @@ const PageLayout = ({ children, title }) => {
     },
     exit: { opacity: 0, y: 20 }
   };
-
+   // style content
   return (
     <>
       <Header />
