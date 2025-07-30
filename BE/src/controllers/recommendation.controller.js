@@ -5,6 +5,7 @@ const { OK } = require('../core/success.response');
 const { BadRequestError } = require('../core/error.response');
 const UserInteraction = require('../models/userInteraction.model');
 const Product = require('../models/products.model');
+const Payment = require('../models/payments.model');
 const mongoose = require('mongoose');
 
 class RecommendationController {
@@ -104,11 +105,18 @@ class RecommendationController {
                 console.log(`User ${userId} has no interactions yet, providing starter recommendations`);
                 
                 try {
-                    // Get popular products
-                    const popularProducts = await this.getPopularProductsData(numLimit / 2);
+                    // Get user's purchased products to exclude
+                    const purchasedProducts = await this.getUserPurchasedProducts(userId);
+                    const purchasedSet = new Set(purchasedProducts);
+                    
+                    // Get popular products, excluding purchased ones
+                    let popularProducts = await this.getPopularProductsData(numLimit, purchasedProducts);
                     
                     // Get some random products to mix in
-                    const allProducts = await Product.find({}).limit(50);
+                    let allProducts = await Product.find({}).limit(100);
+                    allProducts = allProducts.filter(product => 
+                        !purchasedSet.has(product._id.toString())
+                    );
                     const shuffledProducts = allProducts.sort(() => 0.5 - Math.random());
                     const randomProducts = shuffledProducts.slice(0, Math.ceil(numLimit / 2));
                     
@@ -168,6 +176,16 @@ class RecommendationController {
                 // Write interactions to file
                 await fs.writeFile(interactionsFile, JSON.stringify(interactionsData));
                 
+                // Get user's purchased products to exclude from recommendations
+                const purchasedProducts = await this.getUserPurchasedProducts(userId);
+                let purchasedProductsFile = null;
+                
+                if (purchasedProducts.length > 0) {
+                    purchasedProductsFile = path.join(tempDir, `purchased_${userId}_${Date.now()}.json`);
+                    await fs.writeFile(purchasedProductsFile, JSON.stringify(purchasedProducts));
+                    console.log(`Excluding ${purchasedProducts.length} purchased products from recommendations`);
+                }
+                
                 // Check if Python script exists
                 const pythonScriptPath = path.join(__dirname, '../utils/recommendation_engine.py');
                 try {
@@ -178,14 +196,22 @@ class RecommendationController {
                     return await this.getPopularProducts(req, res);
                 }
                 
-                // Spawn Python process with method parameter (always hybrid)
-                const pythonProcess = spawn('python', [
+                // Prepare Python process arguments
+                const pythonArgs = [
                     pythonScriptPath,
                     interactionsFile,
                     userId,
                     numLimit.toString(),
                     method
-                ]);
+                ];
+                
+                // Add purchased products file if available
+                if (purchasedProductsFile) {
+                    pythonArgs.push(purchasedProductsFile);
+                }
+                
+                // Spawn Python process
+                const pythonProcess = spawn('python', pythonArgs);
                 
                 let recommendationData = '';
                 let errorData = '';
@@ -212,8 +238,12 @@ class RecommendationController {
                     pythonProcess.on('close', (code) => {
                         clearTimeout(timeout);
                         
-                        // Clean up temporary file
-                        fs.unlink(interactionsFile).catch(err => console.error(`Failed to delete temp file: ${err.message}`));
+                        // Clean up temporary files
+                        const cleanupPromises = [fs.unlink(interactionsFile).catch(err => console.error(`Failed to delete interactions file: ${err.message}`))];
+                        if (purchasedProductsFile) {
+                            cleanupPromises.push(fs.unlink(purchasedProductsFile).catch(err => console.error(`Failed to delete purchased products file: ${err.message}`)));
+                        }
+                        Promise.all(cleanupPromises);
                         
                         if (code !== 0) {
                             console.error(`Python process exited with code ${code}`);
@@ -309,23 +339,64 @@ class RecommendationController {
         }
     }
     
-    // Helper method to get popular products data without sending response
-    async getPopularProductsData(limit = 8) {
+    // Helper method to get user's purchased products
+    async getUserPurchasedProducts(userId) {
         try {
-            // Get products with most interactions
-            const popularProductIds = await UserInteraction.aggregate([
+            // Get all completed orders for the user
+            const completedOrders = await Payment.find({
+                userId: userId,
+                statusOrder: { $in: ['completed', 'delivered'] }
+            });
+            
+            // Extract unique product IDs from completed orders
+            const purchasedProductIds = new Set();
+            
+            completedOrders.forEach(order => {
+                order.products.forEach(product => {
+                    if (product.productId && !product.productDeleted) {
+                        purchasedProductIds.add(product.productId);
+                    }
+                });
+            });
+            
+            return Array.from(purchasedProductIds);
+        } catch (error) {
+            console.error(`Error getting user purchased products: ${error.message}`);
+            return [];
+        }
+    }
+    
+    // Helper method to get popular products data without sending response
+    async getPopularProductsData(limit = 8, excludeProductIds = []) {
+        try {
+            // Build aggregation pipeline
+            const pipeline = [
                 { $group: { _id: '$productId', totalInteractions: { $sum: { $add: ['$click', '$view', '$favorite', '$purchase'] } } } },
-                { $sort: { totalInteractions: -1 } },
-                { $limit: parseInt(limit, 10) }
-            ]);
+                { $sort: { totalInteractions: -1 } }
+            ];
+            
+            // Add limit after potential filtering
+            pipeline.push({ $limit: parseInt(limit, 10) });
+            
+            // Get products with most interactions
+            const popularProductIds = await UserInteraction.aggregate(pipeline);
             
             // Extract product IDs
             const productIds = popularProductIds.map(item => item._id);
             
+            // Build query to get product details
+            const productQuery = { _id: { $in: productIds } };
+            
+            // Exclude specific product IDs if provided
+            if (excludeProductIds && excludeProductIds.length > 0) {
+                productQuery._id = { 
+                    $in: productIds,
+                    $nin: excludeProductIds.map(id => new mongoose.Types.ObjectId(id))
+                };
+            }
+            
             // Get product details
-            const products = await Product.find({
-                _id: { $in: productIds }
-            }).populate('category').lean();
+            const products = await Product.find(productQuery).populate('category').lean();
             
             // Sort products by interaction count
             const sortedProducts = productIds
@@ -345,7 +416,28 @@ class RecommendationController {
             const { limit = 8 } = req.query;
             const numLimit = parseInt(limit, 10);
             
-            const popularProducts = await this.getPopularProductsData(numLimit);
+            // Get user ID if available
+            const userId = req.params.userId || req.user?.id;
+            
+            // Get user's purchased products to exclude
+            let purchasedProducts = [];
+            if (userId) {
+                try {
+                    purchasedProducts = await this.getUserPurchasedProducts(userId);
+                } catch (error) {
+                    console.error(`Error getting purchased products: ${error.message}`);
+                }
+            }
+            
+            // Get popular products, excluding purchased ones
+            let popularProducts = await this.getPopularProductsData(numLimit * 2, purchasedProducts); // Get more to account for filtering
+            
+            if (purchasedProducts.length > 0) {
+                console.log(`Excluded ${purchasedProducts.length} purchased products from popular recommendations`);
+            }
+            
+            // Limit to requested number
+            popularProducts = popularProducts.slice(0, numLimit);
             
             // If no popular products found, get random products
             if (!popularProducts || popularProducts.length === 0) {
@@ -369,12 +461,34 @@ class RecommendationController {
     // Get random products as a last resort fallback
     async getRandomProducts(req, res, limit = 8) {
         try {
-            // Get random products directly from the database
-            const randomProducts = await Product.find()
+            // Get user ID if available
+            const userId = req.params.userId || req.user?.id;
+            
+            // Get more products to account for filtering
+            let randomProducts = await Product.find()
                 .populate('category')
                 .lean()
-                .limit(limit)
+                .limit(limit * 2)
                 .sort({ createdAt: -1 });
+            
+            // If user is logged in, filter out purchased products
+            if (userId) {
+                try {
+                    const purchasedProducts = await this.getUserPurchasedProducts(userId);
+                    if (purchasedProducts.length > 0) {
+                        const purchasedSet = new Set(purchasedProducts);
+                        randomProducts = randomProducts.filter(product => 
+                            !purchasedSet.has(product._id.toString())
+                        );
+                        console.log(`Filtered out ${purchasedProducts.length} purchased products from random recommendations`);
+                    }
+                } catch (error) {
+                    console.error(`Error filtering purchased products from random: ${error.message}`);
+                }
+            }
+            
+            // Limit to requested number
+            randomProducts = randomProducts.slice(0, limit);
             
             const safeRandom = JSON.parse(JSON.stringify(randomProducts));
             return new OK({
