@@ -7,21 +7,39 @@ const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 const modelProduct = require('../models/products.model');
 const modelCategory = require('../models/category.model');
 
-// Lưu trữ lịch sử chat và context cho mỗi người dùng
+// Cloudinary configuration
+const CLOUDINARY_BASE_URL = 'https://res.cloudinary.com/dgliyvuvy/image/upload';
+const DEFAULT_IMAGE = `${CLOUDINARY_BASE_URL}/v1712345678/phone_shop/default-product.webp`;
+
 const chatHistory = new Map();
 const userContext = new Map();
 
-// Hàm lấy tất cả dữ liệu từ database
+// Helper function to get image URL
+function getImageUrl(imagePath) {
+  if (
+    !imagePath ||
+    imagePath.includes('placeholder-product.jpg') ||
+    imagePath.startsWith('/')
+  ) {
+    return DEFAULT_IMAGE;
+  }
+
+  if (imagePath.startsWith('http')) return imagePath;
+  return `${CLOUDINARY_BASE_URL}/${imagePath}`;
+}
+//
+
+
 async function getAllDatabaseData() {
     try {
         const [products, categories] = await Promise.all([
-            modelProduct.find({}),
+            modelProduct.find({}).populate('category'),
             modelCategory.find({})
         ]);
 
         return {
             products: products.map(product => ({
-                id: product._id,
+                id: product._id.toString(),
                 name: product.name,
                 price: product.price,
                 priceDiscount: product.priceDiscount,
@@ -30,10 +48,11 @@ async function getAllDatabaseData() {
                 stock: product.stock,
                 rating: product.rating,
                 category: product.category,
-                images: product.images
+                images: product.images?.map(img => getImageUrl(img)) || [DEFAULT_IMAGE],
+                slug: product.slug || product._id.toString()
             })),
             categories: categories.map(cat => ({
-                id: cat._id,
+                id: cat._id.toString(),
                 name: cat.name,
                 description: cat.description
             }))
@@ -47,7 +66,7 @@ async function getAllDatabaseData() {
 // Hàm tìm kiếm sản phẩm thông minh
 async function smartProductSearch(query) {
     try {
-        const products = await modelProduct.find({});
+        const products = await modelProduct.find({}).populate('category');
         const searchTerms = query.toLowerCase().split(' ').filter(term => term.length > 1);
         
         return products.filter(product => {
@@ -55,7 +74,7 @@ async function smartProductSearch(query) {
                 product.name,
                 product.description || '',
                 Object.values(product.attributes || {}).join(' '),
-                product.category || ''
+                product.category?.nameCategory || ''
             ].join(' ').toLowerCase();
             
             return searchTerms.some(term => searchText.includes(term));
@@ -152,6 +171,7 @@ function buildIntelligentContext(userId, question, dbData) {
 
     // Tìm sản phẩm được đề cập trong câu hỏi
     const mentionedProducts = smartProductSearch(question);
+    console.log ("mentionedProducts:",mentionedProducts)
     if (mentionedProducts.length > 0) {
         context.currentProducts = mentionedProducts.slice(0, 3); // Lấy top 3 sản phẩm liên quan
     }
@@ -194,16 +214,14 @@ function buildIntelligentContext(userId, question, dbData) {
 function createIntelligentPrompt(question, context, dbData) {
     const { products, categories } = dbData;
     
-    // Tạo thông tin sản phẩm có cấu trúc
     const productInfo = products.map(product => `
 ID: ${product.id}
-        Tên: ${product.name}
+Tên: ${product.name}
 Giá: ${product.price.toLocaleString('vi-VN')}đ${product.priceDiscount ? ` (Giảm giá: ${product.priceDiscount.toLocaleString('vi-VN')}đ)` : ''}
 Mô tả: ${product.description || 'Không có mô tả'}
 Thông số: ${Object.entries(product.attributes || {}).map(([k, v]) => `${k}: ${v}`).join(', ')}
-Tình trạng: ${product.stock > 0 ? 'Còn hàng' : 'Hết hàng'}
-Đánh giá: ${product.rating || 'Chưa có đánh giá'}
-Danh mục: ${product.category || 'Chưa phân loại'}
+Ảnh: ${product.images?.[0] || DEFAULT_IMAGE}
+Slug: ${product.slug}
 `).join('\n---\n');
 
     const categoryInfo = categories.map(cat => `
@@ -259,13 +277,32 @@ QUY TẮC TRẢ LỜI QUAN TRỌNG:
    - Sử dụng emoji phù hợp
    - Không đề cập đến từ "database"
 
+5. KHI TRẢ LỜI VỀ SẢN PHẨM:
+   - Nếu câu hỏi liên quan đến sản phẩm cụ thể, hãy trả lời với format JSON đặc biệt:
+   {
+     "type": "product_info",
+     "message": "Thông tin sản phẩm...",
+     "products": [
+       {
+         "id": "product_id",
+         "name": "Tên sản phẩm",
+         "price": 1000000,
+         "priceDiscount": 900000,
+         "image": "đường_dẫn_ảnh",
+         "slug": "product_slug"
+       }
+     ]
+   }
+   
+   - Nếu không có sản phẩm cụ thể, trả lời bình thường
+
 VÍ DỤ CỤ THỂ:
 
 Câu hỏi: "Xin chào"
 Trả lời: "Xin chào! Chào mừng bạn đến với cửa hàng điện thoại của chúng tôi. Tôi có thể hỗ trợ gì cho bạn hôm nay? 😊"
 
 Câu hỏi: "iPhone 15 Pro Max giá bao nhiêu?"
-- Nếu có trong danh sách: "iPhone 15 Pro Max hiện có giá [giá cụ thể] tại cửa hàng..."
+- Nếu có trong danh sách: Trả lời với JSON format như trên
 - Nếu không có: "Xin lỗi, hiện tại cửa hàng chúng tôi không có sản phẩm iPhone 15 Pro Max mà bạn đang tìm kiếm."
 
 Câu hỏi: "Hôm nay thời tiết thế nào?"
@@ -276,44 +313,57 @@ Hãy áp dụng các quy tắc trên để trả lời câu hỏi một cách ch
 }
 
 // Hàm xử lý câu hỏi chính
+
 async function askQuestion(question, userId = 'guest') {
     try {
-        // Lấy tất cả dữ liệu từ database
         const dbData = await getAllDatabaseData();
-        
-        // Xây dựng context thông minh
         const context = buildIntelligentContext(userId, question, dbData);
-        
-        // Tạo prompt thông minh
         const prompt = createIntelligentPrompt(question, context, dbData);
         
-        // Gọi AI để trả lời
         const result = await model.generateContent(prompt);
-        const answer = result.response.text();
+const answer = result.response.text();
 
-        // Lưu lịch sử chat
+// Parse JSON response if exists
+let parsedAnswer;
+try {
+  const jsonMatch = answer.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    parsedAnswer = JSON.parse(jsonMatch[0]);
+
+    // ✅ Gắn lại ảnh đúng từ DB nếu có
+    if (parsedAnswer.products) {
+     parsedAnswer.products = parsedAnswer.products.map(product => {
+  const matched = dbData.products.find(p =>
+    p.id === product.id || p.slug === product.slug
+  );
+
+  return {
+    ...product,
+    image: matched?.images?.[0] || DEFAULT_PRODUCT_IMAGE
+  };
+});
+    }
+  }
+} catch (e) {
+  console.error('Error parsing JSON response:', e);
+}
+
+
+        // Save chat history
         if (!chatHistory.has(userId)) {
             chatHistory.set(userId, []);
         }
         
-        const userHistory = chatHistory.get(userId);
-        userHistory.push({
+        chatHistory.get(userId).push({
             question,
-            answer,
-            timestamp: new Date(),
-            context: { ...context }
+            answer: parsedAnswer || answer,
+            timestamp: new Date()
         });
 
-        // Giới hạn lịch sử
-        if (userHistory.length > 20) {
-            userHistory.splice(0, 10);
-        }
-
-        return answer;
-
+        return parsedAnswer || answer;
     } catch (error) {
-        console.error('Error in intelligent askQuestion:', error);
-        return 'Xin lỗi, đã có lỗi xảy ra khi xử lý câu hỏi của bạn. Vui lòng thử lại sau hoặc liên hệ trực tiếp với nhân viên tư vấn để được hỗ trợ tốt nhất.';
+        console.error('Error in askQuestion:', error);
+        return 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại sau.';
     }
 }
 
