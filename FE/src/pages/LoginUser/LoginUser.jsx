@@ -12,7 +12,7 @@ import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { requestLogin, requestLoginGoogle } from '../../Config/request';
 import { useState } from 'react';
 import { useStore } from '../../hooks/useStore';
-import { SUCCESS_TYPES } from '../../../Components/ProgressSuccess/SuccessProgress';
+import { SUCCESS_TYPES } from '../../Components/ProgressSuccess/SuccessProgress';
 
 import heroImage from '../../assets/images/hero-image.png';
 

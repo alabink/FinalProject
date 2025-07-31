@@ -5,7 +5,7 @@ import cookies from 'js-cookie';
 
 import { useEffect, useState } from 'react';
 import { requestAuth, requestGetAllCategory, requestGetCart, requestLogout, requestDeleteCart } from '../Config/request';
-import SuccessProgress from '../../Components/ProgressSuccess/SuccessProgress';
+import SuccessProgress from '../Components/ProgressSuccess/SuccessProgress';
 
 export function Provider({ children }) {
     const [dataUser, setDataUser] = useState({});

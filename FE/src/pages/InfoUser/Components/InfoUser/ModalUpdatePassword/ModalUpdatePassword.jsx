@@ -2,7 +2,7 @@ import { Modal, Form, Input } from 'antd';
 import { useState } from 'react';
 import { requestUpdatePassword } from '../../../../../Config/request';
 import { useStore } from '../../../../../hooks/useStore';
-import { SUCCESS_TYPES } from '../../../../../../Components/ProgressSuccess/SuccessProgress';
+import { SUCCESS_TYPES } from '../../../../../Components/ProgressSuccess/SuccessProgress';
 
 function ModalUpdatePassword({ isOpen, setIsOpen }) {
     const [form] = Form.useForm();

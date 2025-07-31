@@ -3,13 +3,13 @@ import styles from './InfoUser.module.scss';
 
 import { Button, Input, Form, Upload, Avatar, Row, Col, Card, Typography, Divider } from 'antd';
 import { UserOutlined, UploadOutlined, MailOutlined, PhoneOutlined, HomeOutlined } from '@ant-design/icons';
-import VerifiedBadge from '../../../../../Components/VerifiedBadge/VerifiedBadge';
+import VerifiedBadge from '../../../../Components/VerifiedBadge/VerifiedBadge';
 import { useStore } from '../../../../hooks/useStore';
 import { useEffect, useState } from 'react';
 import { requestUpdateInfoUser } from '../../../../Config/request';
 import ModalUpdatePassword from './ModalUpdatePassword/ModalUpdatePassword';
 import OrderHistory from '../OrderHistory/OrderHistory';
-import { SUCCESS_TYPES } from '../../../../../Components/ProgressSuccess/SuccessProgress';
+import { SUCCESS_TYPES } from '../../../../Components/ProgressSuccess/SuccessProgress';
 
 const cx = classNames.bind(styles);
 const { Title, Text } = Typography;
