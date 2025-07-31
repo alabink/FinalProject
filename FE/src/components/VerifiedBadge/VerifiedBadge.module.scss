@@ -1,0 +1,49 @@
+.verified-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #1890ff; // Blue checkmark color
+    margin-left: 6px;
+    position: relative;
+    filter: drop-shadow(0 0 2px rgba(24, 144, 255, 0.3));
+    line-height: 1;
+    vertical-align: middle;
+    transform: translateY(0); // Remove the negative transform
+    
+    .icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    @keyframes pulse-blue {
+        0% {
+            filter: drop-shadow(0 0 2px rgba(24, 144, 255, 0.3));
+        }
+        50% {
+            filter: drop-shadow(0 0 4px rgba(24, 144, 255, 0.6));
+        }
+        100% {
+            filter: drop-shadow(0 0 2px rgba(24, 144, 255, 0.3));
+        }
+    }
+    
+    animation: pulse-blue 2s infinite ease-in-out;
+    
+    &.small {
+        font-size: 12px;
+    }
+    
+    &.medium {
+        font-size: 14px;
+    }
+    
+    &.large {
+        font-size: 16px;
+    }
+    
+    &:hover {
+        color: #096dd9; // Darker blue on hover
+        filter: drop-shadow(0 0 4px rgba(24, 144, 255, 0.6));
+    }
+} 

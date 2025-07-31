@@ -320,7 +320,7 @@ const ProductManagement = ({ setActiveComponent, setProductId }) => {
                     <p className={cx('banner-description')}>Theo dõi và quản lý danh sách sản phẩm hiện có</p>
                 </div>
                 <div className={cx('banner-icon')}>
-                    <TagOutlined />
+                    <ShoppingOutlined />
                 </div>
             </motion.div>
 

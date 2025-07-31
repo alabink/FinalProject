@@ -1,9 +1,9 @@
 import './App.css';
 import Header from './Components/Header/Header';
 import MainHome from './Components/MainHome/MainHome';
-import Footer from '../Components/Footer/Footer';
+import Footer from './Components/Footer/Footer';
 
-import Chatbot from '../utils/chatbot';
+import Chatbot from './utils/chatbot';
 import { useEffect } from 'react';
 
 function App() {
