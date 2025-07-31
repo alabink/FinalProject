@@ -1,4 +1,10 @@
-// Modern TechifyAI Chatbot Styles
+/* Modern TechifyAI Chatbot Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 .chatButton {
     position: fixed;
     bottom: 20px;
@@ -20,75 +26,64 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1000;
     overflow: hidden;
-
-    &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, 
-            rgba(255, 255, 255, 0.3) 0%, 
-            rgba(255, 255, 255, 0.1) 100%);
-        border-radius: 50%;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-
-    &:hover {
-        transform: scale(1.05);
-        box-shadow: 
-            0 12px 40px rgba(102, 126, 234, 0.5),
-            0 6px 20px rgba(0, 0, 0, 0.15);
-
-        &::before {
-            opacity: 1;
-        }
-    }
-
-    &:active {
-        transform: scale(0.95);
-    }
-
-    .chatIcon {
-        position: relative;
-        z-index: 1;
-        font-size: 32px;
-    }
-
-    .chatButtonGlow {
-        position: absolute;
-        top: -2px;
-        left: -2px;
-        right: -2px;
-        bottom: -2px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        opacity: 0.7;
-        filter: blur(8px);
-        z-index: -1;
-        animation: pulse 2s infinite;
-    }
 }
 
-@keyframes pulse {
-    0%, 100% {
-        transform: scale(1);
-        opacity: 0.7;
-    }
-    50% {
-        transform: scale(1.1);
-        opacity: 0.9;
-    }
+.chatButton::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.3) 0%, 
+        rgba(255, 255, 255, 0.1) 100%);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.chatButton:hover {
+    transform: scale(1.05);
+    box-shadow: 
+        0 12px 40px rgba(102, 126, 234, 0.5),
+        0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.chatButton:hover::before {
+    opacity: 1;
+}
+
+.chatButton:active {
+    transform: scale(0.95);
+}
+
+.chatIcon {
+    position: relative;
+    z-index: 1;
+    font-size: 32px;
+}
+
+.chatButtonGlow {
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    opacity: 0.7;
+    filter: blur(8px);
+    z-index: -1;
+    animation: pulse 2s infinite;
 }
 
 .chatbotContainer {
     position: fixed;
-    bottom: 100px;
-    right: 20px;
-    width: 420px;
-    height: 650px;
+     width: 500px;  /* Tăng từ 420px lên 500px */
+    height: 720px; /* Tăng từ 650px lên 720px */
+    bottom: 90px;  /* Điều chỉnh vị trí */
+    right: 25px;
     background: linear-gradient(135deg, 
         rgba(255, 255, 255, 0.95) 0%, 
         rgba(248, 250, 252, 0.92) 100%);
@@ -104,19 +99,19 @@
     flex-direction: column;
     overflow: hidden;
     z-index: 1000;
+}
 
-    &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, 
-            rgba(102, 126, 234, 0.03) 0%, 
-            rgba(118, 75, 162, 0.03) 100%);
-        pointer-events: none;
-    }
+.chatbotContainer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+        rgba(102, 126, 234, 0.03) 0%, 
+        rgba(118, 75, 162, 0.03) 100%);
+    pointer-events: none;
 }
 
 .chatHeader {
@@ -129,131 +124,99 @@
     align-items: center;
     position: relative;
     overflow: hidden;
+}
 
-    &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, 
-            rgba(255, 255, 255, 0.1) 0%, 
-            rgba(255, 255, 255, 0.05) 100%);
-        pointer-events: none;
-    }
+.chatHeader::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.1) 0%, 
+        rgba(255, 255, 255, 0.05) 100%);
+    pointer-events: none;
+}
 
-    .headerContent {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        position: relative;
-        z-index: 1;
-    }
+.headerContent {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+}
 
-    .aiAvatar {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, 
-            rgba(255, 255, 255, 0.2) 0%, 
-            rgba(255, 255, 255, 0.1) 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        position: relative;
-        border: 2px solid rgba(255, 255, 255, 0.3);
+.aiAvatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.2) 0%, 
+        rgba(255, 255, 255, 0.1) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    position: relative;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
 
-        .aiStatus {
-            position: absolute;
-            bottom: 2px;
-            right: 2px;
-            width: 12px;
-            height: 12px;
-            background: #10b981;
-            border-radius: 50%;
-            border: 2px solid white;
-            animation: pulse 2s infinite;
-        }
-    }
+.aiStatus {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 12px;
+    height: 12px;
+    background: #10b981;
+    border-radius: 50%;
+    border: 2px solid white;
+    animation: pulse 2s infinite;
+}
 
-    .headerInfo {
-        h2 {
-            margin: 0;
-            font-size: 20px;
-            font-weight: 700;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+.headerInfo h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
 
-        .subtitle {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 14px;
-            opacity: 0.9;
-            margin-top: 2px;
-            font-weight: 500;
-        }
-    }
+.subtitle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    opacity: 0.9;
+    margin-top: 2px;
+    font-weight: 500;
+}
 
-    .headerActions {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        position: relative;
-        z-index: 1;
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+}
 
-        .clearButton {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            cursor: pointer;
-            font-size: 18px;
-            padding: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-            transition: all 0.3s ease;
+.clearButton, .closeButton {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
 
-            &:hover {
-                background: rgba(255, 255, 255, 0.2);
-                border-color: rgba(255, 255, 255, 0.3);
-                transform: scale(1.05);
-            }
-
-            svg {
-                width: 20px;
-                height: 20px;
-                path {
-                    fill: currentColor;
-                }
-            }
-        }
-    }
-
-    .closeButton {
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: white;
-        cursor: pointer;
-        font-size: 18px;
-        padding: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 12px;
-        transition: all 0.3s ease;
-        position: relative;
-        z-index: 1;
-
-        &:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.3);
-            transform: scale(1.05);
-        }
-    }
+.clearButton:hover, .closeButton:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
 }
 
 .messageList {
@@ -275,55 +238,55 @@
     align-items: flex-start;
     max-width: 85%;
     animation: slideInMessage 0.3s ease;
+}
 
-    &.userMessage {
-        align-self: flex-end;
-        flex-direction: row-reverse;
+.message.userMessage {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
 
-        .messageContent {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 20px 20px 6px 20px;
-            box-shadow: 
-                0 4px 12px rgba(102, 126, 234, 0.3),
-                0 2px 6px rgba(0, 0, 0, 0.1);
-        }
+.message.userMessage .messageContent {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 20px 20px 6px 20px;
+    box-shadow: 
+        0 4px 12px rgba(102, 126, 234, 0.3),
+        0 2px 6px rgba(0, 0, 0, 0.1);
+}
 
-        .messageAvatar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
+.message.userMessage .messageAvatar {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
 
-        .messageTime {
-            color: rgba(255, 255, 255, 0.8);
-            justify-content: flex-end;
-        }
-    }
+.message.userMessage .messageTime {
+    color: rgba(255, 255, 255, 0.8);
+    justify-content: flex-end;
+}
 
-    &.botMessage {
-        align-self: flex-start;
+.message.botMessage {
+    align-self: flex-start;
+}
 
-        .messageContent {
-            background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.9) 0%, 
-                rgba(248, 250, 252, 0.8) 100%);
-            color: #374151;
-            border-radius: 20px 20px 20px 6px;
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 
-                0 4px 12px rgba(0, 0, 0, 0.05),
-                0 2px 6px rgba(0, 0, 0, 0.03);
-        }
+.message.botMessage .messageContent {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.9) 0%, 
+        rgba(248, 250, 252, 0.8) 100%);
+    color: #374151;
+    border-radius: 20px 20px 20px 6px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.05),
+        0 2px 6px rgba(0, 0, 0, 0.03);
+}
 
-        .messageAvatar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
+.message.botMessage .messageAvatar {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
 
-        .messageTime {
-            color: rgba(0, 0, 0, 0.6);
-        }
-    }
+.message.botMessage .messageTime {
+    color: rgba(0, 0, 0, 0.6);
 }
 
 .messageAvatar {
@@ -346,10 +309,10 @@
     border-radius: 50%;
     object-fit: cover;
     transition: all 0.3s ease;
-    
-    &:hover {
-        transform: scale(1.1);
-    }
+}
+
+.userAvatarImage:hover {
+    transform: scale(1.1);
 }
 
 .messageContent {
@@ -360,52 +323,317 @@
     position: relative;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+}
 
-    .messageTime {
-        font-size: 12px;
-        opacity: 0.8;
-        margin-top: 4px;
-        display: flex;
-        align-items: center;
-        gap: 4px;
+.messageTime {
+    font-size: 12px;
+    opacity: 0.8;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
 
-        &::before {
-            content: '•';
-            margin: 0 4px;
-        }
-    }
+.messageTime::before {
+    content: '•';
+    margin: 0 4px;
+}
+
+.messageText {
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 
 .typingIndicator {
     display: flex;
     gap: 4px;
+}
+
+.typingIndicator span {
+    width: 6px;
+    height: 6px;
+    background: #667eea;
+    border-radius: 50%;
+    animation: typingDot 1.4s infinite;
+}
+
+.typingIndicator span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typingIndicator span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+.productResponse {
+    width: 100%;
+    font-size: 15px;
+}
+
+.productMessage {
+    margin-bottom: 16px;
+    line-height: 1.5;
+    color: #374151;
+}
+
+.productGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.productCard {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(248, 250, 252, 0.9) 100%);
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    transition: all 0.3s ease;
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.05),
+        0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+.productCard:hover {
+    border-color: rgba(102, 126, 234, 0.3);
+    box-shadow: 
+        0 8px 24px rgba(102, 126, 234, 0.15),
+        0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+.productImage {
+    width: 100px;
+    height: 100px;
+    border-radius: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.productImage img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.productImage:hover img {
+    transform: scale(1.1);
+}
+
+.productInfo {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.productName {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+    line-height: 1.4;
+    /* Cho phép hiển thị đầy đủ tên sản phẩm */
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+.productPrice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+}
+
+.price {
+    font-size: 16px;
+    font-weight: 700;
+    color: #059669;
+}
+
+.discountPrice {
+    font-size: 16px;
+    font-weight: 700;
+    color: #dc2626;
+}
+
+.originalPrice {
+    font-size: 14px;
+    color: #6b7280;
+    text-decoration: line-through;
+}
+
+.productActions {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+}
+
+.productActions button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.viewButton {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.viewButton:hover {
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.cartButton {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.cartButton:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+}
+
+/* Phần gợi ý và so sánh */
+.suggestions {
+    margin-top: 16px;
+    padding: 12px;
+    background: rgba(248, 250, 252, 0.8);
+    border-radius: 12px;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.suggestionTitle {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #374151;
+}
+
+.suggestionList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.suggestionItem {
+    padding: 6px 12px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 20px;
+    font-size: 13px;
+    color: #667eea;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.suggestionItem:hover {
+    background: rgba(102, 126, 234, 0.2);
+}
+
+.compareButton {
+    margin-top: 12px;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.3s ease;
+}
+
+.compareButton:hover {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .productCard {
+        padding: 14px;
+        gap: 14px;
+    }
     
-    span {
-        width: 6px;
-        height: 6px;
-        background: #667eea;
-        border-radius: 50%;
-        animation: typingDot 1.4s infinite;
-        
-        &:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-        
-        &:nth-child(3) {
-            animation-delay: 0.4s;
-        }
+    .productImage {
+        width: 90px;
+        height: 90px;
+    }
+    
+    .productName {
+        font-size: 15px;
+    }
+    
+    .price, .discountPrice {
+        font-size: 15px;
     }
 }
 
-@keyframes typingDot {
-    0%, 60%, 100% {
-        transform: translateY(0);
-        opacity: 0.5;
+@media (max-width: 480px) {
+    .productCard {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
     }
-    30% {
-        transform: translateY(-8px);
-        opacity: 1;
+    
+    .productImage {
+        width: 120px;
+        height: 120px;
     }
+    
+    .productInfo {
+        align-items: center;
+        text-align: center;
+    }
+    
+    .productActions {
+        justify-content: center;
+    }
+}
+
+.viewButton {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.viewButton:hover {
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.cartButton {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.cartButton:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
 }
 
 .inputForm {
@@ -438,24 +666,24 @@
     -webkit-backdrop-filter: blur(10px);
     transition: all 0.3s ease;
     font-weight: 500;
+}
 
-    &:focus {
-        border-color: #667eea;
-        box-shadow: 
-            0 0 0 3px rgba(102, 126, 234, 0.1),
-            0 4px 12px rgba(102, 126, 234, 0.15);
-    }
+.input:focus {
+    border-color: #667eea;
+    box-shadow: 
+        0 0 0 3px rgba(102, 126, 234, 0.1),
+        0 4px 12px rgba(102, 126, 234, 0.15);
+}
 
-    &:disabled {
-        background: rgba(248, 250, 252, 0.5);
-        cursor: not-allowed;
-        opacity: 0.7;
-    }
+.input:disabled {
+    background: rgba(248, 250, 252, 0.5);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
 
-    &::placeholder {
-        color: #9ca3af;
-        font-weight: 500;
-    }
+.input::placeholder {
+    color: #9ca3af;
+    font-weight: 500;
 }
 
 .sendButton {
@@ -474,24 +702,24 @@
     box-shadow: 
         0 4px 12px rgba(102, 126, 234, 0.3),
         0 2px 6px rgba(0, 0, 0, 0.1);
+}
 
-    &:hover:not(:disabled) {
-        background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
-        box-shadow: 
-            0 6px 16px rgba(102, 126, 234, 0.4),
-            0 3px 8px rgba(0, 0, 0, 0.15);
-        transform: translateY(-1px);
-    }
+.sendButton:hover:not(:disabled) {
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+    box-shadow: 
+        0 6px 16px rgba(102, 126, 234, 0.4),
+        0 3px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
 
-    &:active:not(:disabled) {
-        transform: translateY(0);
-    }
+.sendButton:active:not(:disabled) {
+    transform: translateY(0);
+}
 
-    &:disabled {
-        background: linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%);
-        cursor: not-allowed;
-        box-shadow: none;
-    }
+.sendButton:disabled {
+    background: linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%);
+    cursor: not-allowed;
+    box-shadow: none;
 }
 
 .quickActions {
@@ -520,14 +748,37 @@
     transition: all 0.3s ease;
     color: #667eea;
     font-weight: 600;
+}
 
-    &:hover {
-        background: linear-gradient(135deg, 
-            rgba(102, 126, 234, 0.15) 0%, 
-            rgba(118, 75, 162, 0.15) 100%);
-        border-color: rgba(102, 126, 234, 0.3);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(102, 126, 234, 0.15);
+.quickAction:hover {
+    background: linear-gradient(135deg, 
+        rgba(102, 126, 234, 0.15) 0%, 
+        rgba(118, 75, 162, 0.15) 100%);
+    border-color: rgba(102, 126, 234, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.15);
+}
+
+/* Animations */
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.9;
+    }
+}
+
+@keyframes typingDot {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.5;
+    }
+    30% {
+        transform: translateY(-8px);
+        opacity: 1;
     }
 }
 
@@ -542,7 +793,7 @@
     }
 }
 
-// Scrollbar styling
+/* Scrollbar styling */
 .messageList::-webkit-scrollbar {
     width: 6px;
 }
@@ -555,13 +806,32 @@
 .messageList::-webkit-scrollbar-thumb {
     background: linear-gradient(135deg, #667eea, #764ba2);
     border-radius: 10px;
-    
-    &:hover {
-        background: linear-gradient(135deg, #5a67d8, #6b46c1);
-    }
 }
 
-// Responsive Design
+.messageList::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #5a67d8, #6b46c1);
+}
+
+/* Product grid scrollbar */
+.productGrid::-webkit-scrollbar {
+    width: 4px;
+}
+
+.productGrid::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 8px;
+}
+
+.productGrid::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 8px;
+}
+
+.productGrid::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #5a67d8, #6b46c1);
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
     .chatbotContainer {
         width: calc(100vw - 32px);
@@ -577,25 +847,25 @@
         bottom: 16px;
         right: 16px;
         font-size: 24px;
+    }
 
-        .chatIcon {
-            font-size: 28px;
-        }
+    .chatIcon {
+        font-size: 28px;
     }
 
     .chatHeader {
         padding: 16px 20px;
         border-radius: 20px 20px 0 0;
+    }
 
-        .aiAvatar {
-            width: 42px;
-            height: 42px;
-            font-size: 20px;
-        }
+    .aiAvatar {
+        width: 42px;
+        height: 42px;
+        font-size: 20px;
+    }
 
-        .headerInfo h2 {
-            font-size: 18px;
-        }
+    .headerInfo h2 {
+        font-size: 18px;
     }
 
     .messageList {
@@ -615,6 +885,28 @@
         width: 44px;
         height: 44px;
         font-size: 16px;
+    }
+    
+    .productCard {
+        padding: 10px;
+    }
+    
+    .productImage {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .productName {
+        font-size: 13px;
+    }
+    
+    .productPrice {
+        font-size: 12px;
+    }
+    
+    .productActions button {
+        padding: 5px 8px;
+        font-size: 10px;
     }
 }
 
@@ -642,4 +934,20 @@
         padding: 6px 10px;
         font-size: 12px;
     }
+    
+    .productCard {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .productImage {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 8px;
+    }
+    
+    .productActions {
+        justify-content: center;
+    }
+    
 }

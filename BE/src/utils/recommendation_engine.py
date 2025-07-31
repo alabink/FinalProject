@@ -16,14 +16,16 @@ class RecommendationEngine:
         self.product_features_df = None
         self.user_item_matrix = None
         self.model = None
+        self.user_purchased_products = set()  # Add set to track purchased products
         
-    def load_data(self, interactions_file, products_file=None):
+    def load_data(self, interactions_file, products_file=None, purchased_products_file=None):
         """
         Load user interactions and product data from JSON files
         
         Parameters:
         interactions_file (str): Path to the user interactions JSON file
         products_file (str): Path to products JSON file (optional)
+        purchased_products_file (str): Path to purchased products JSON file (optional)
         """
         try:
             # Check if file exists
@@ -61,6 +63,21 @@ class RecommendationEngine:
                 return False
                 
             self.user_interactions_df = pd.DataFrame(interactions_list)
+            
+            # Load purchased products if provided
+            if purchased_products_file and os.path.exists(purchased_products_file):
+                try:
+                    with open(purchased_products_file, 'r', encoding='utf-8') as f:
+                        purchased_data = json.load(f)
+                    
+                    # Extract purchased product IDs
+                    self.user_purchased_products = set(str(product_id) for product_id in purchased_data)
+                    print(f"Loaded {len(self.user_purchased_products)} purchased products to exclude")
+                except Exception as e:
+                    print(f"Warning: Could not load purchased products: {str(e)}")
+                    self.user_purchased_products = set()
+            else:
+                self.user_purchased_products = set()
             
             # Load product data if provided
             if products_file:
@@ -222,6 +239,9 @@ class RecommendationEngine:
                 self.user_interactions_df['userId'] == user_id
             ]['productId'].unique())
             
+            # Combine user interactions with purchased products to exclude
+            excluded_products = user_interactions.union(self.user_purchased_products)
+            
             recommendations = []
             
             # Get recommendations from similar users
@@ -233,9 +253,9 @@ class RecommendationEngine:
                     self.user_interactions_df['userId'] == similar_user_id
                 ].sort_values('score', ascending=False)['productId'].unique()
                 
-                # Add products that current user hasn't interacted with
+                # Add products that current user hasn't interacted with and hasn't purchased
                 for product_id in similar_user_products:
-                    if product_id not in user_interactions and product_id not in recommendations:
+                    if product_id not in excluded_products and product_id not in recommendations:
                         recommendations.append(product_id)
                         if len(recommendations) >= n_recommendations:
                             break
@@ -243,11 +263,11 @@ class RecommendationEngine:
                 if len(recommendations) >= n_recommendations:
                     break
                     
-            # If not enough recommendations, add popular products
+            # If not enough recommendations, add popular products (excluding purchased ones)
             if len(recommendations) < n_recommendations:
                 popular_products = self._get_popular_products(n_recommendations - len(recommendations))
                 for product in popular_products:
-                    if product not in recommendations and product not in user_interactions:
+                    if product not in recommendations and product not in excluded_products:
                         recommendations.append(product)
             
             return recommendations[:n_recommendations]
@@ -291,10 +311,13 @@ class RecommendationEngine:
                 product_scores['purchase'] * 5.0
             )
             
-            # Get top products
+            # Get top products, excluding purchased ones
             popular_products = product_scores.sort_values('popularity', ascending=False).index.tolist()
             
-            return popular_products[:n_products]
+            # Filter out purchased products
+            filtered_products = [product for product in popular_products if product not in self.user_purchased_products]
+            
+            return filtered_products[:n_products]
         except Exception as e:
             print(f"Error getting popular products: {str(e)}")
             traceback.print_exc()
@@ -315,20 +338,23 @@ class RecommendationEngine:
 def main():
     try:
         if len(sys.argv) < 3:
-            print("Usage: python recommendation_engine.py <interactions_file> <user_id> [n_recommendations]")
+            print("Usage: python recommendation_engine.py <interactions_file> <user_id> [n_recommendations] [purchased_products_file]")
             sys.exit(1)
             
         interactions_file = sys.argv[1]
         user_id = sys.argv[2]
         n_recommendations = int(sys.argv[3]) if len(sys.argv) > 3 else 10
+        purchased_products_file = sys.argv[4] if len(sys.argv) > 4 else None
         
         print(f"Starting recommendation engine with: file={interactions_file}, user={user_id}, limit={n_recommendations}")
+        if purchased_products_file:
+            print(f"Excluding purchased products from: {purchased_products_file}")
         
         engine = RecommendationEngine()
         
         # Load data
         print("Loading data...")
-        if not engine.load_data(interactions_file):
+        if not engine.load_data(interactions_file, purchased_products_file=purchased_products_file):
             print("Failed to load data")
             sys.exit(1)
             
