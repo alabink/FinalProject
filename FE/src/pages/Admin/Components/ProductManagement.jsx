@@ -4,6 +4,10 @@ import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined, SearchOutlined
 import { requestDeleteProduct, requestGetAllProduct } from '../../../Config/request';
 import styles from './ProductManagement.module.scss';
 import classNames from 'classnames/bind';
+import { motion } from 'framer-motion';
+import { TagOutlined } from '@ant-design/icons';
+
+
 const cx = classNames.bind(styles);
 
 const ProductManagement = ({ setActiveComponent, setProductId }) => {
@@ -305,7 +309,21 @@ const ProductManagement = ({ setActiveComponent, setProductId }) => {
 
     return (
         <div className={cx('product-management')}>
-            
+            <motion.div 
+                className={cx('banner')}
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                >
+                <div className={cx('banner-content')}>
+                    <h1 className={cx('banner-title')}>Quản lý sản phẩm</h1>
+                    <p className={cx('banner-description')}>Theo dõi và quản lý danh sách sản phẩm hiện có</p>
+                </div>
+                <div className={cx('banner-icon')}>
+                    <TagOutlined />
+                </div>
+            </motion.div>
+
             {/* Thống kê */}
             <Row gutter={16} className={cx('stats-row')}>
                 <Col xs={24} sm={12} md={6}>
