@@ -52,6 +52,7 @@ import {
     requestGetAllProduct,
     requestUpdateCoupon,
 } from '../../../../Config/request';
+import { motion } from 'framer-motion';
 
 const cx = classNames.bind(styles);
 const { RangePicker } = DatePicker;
@@ -337,6 +338,7 @@ function CouponManagement() {
         const percent = Math.round((coupon.quantity / total) * 100);
         
         return (
+            
             <Card
                 key={coupon._id}
                 className={cx('coupon-card', {
@@ -544,11 +546,26 @@ function CouponManagement() {
 
     return (
         <div className={cx('coupon-management')}>
+            <motion.div 
+                className={cx('banner')}
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                            >
+                            <div className={cx('banner-content')}>
+                                <h1 className={cx('banner-title')}>Quản lý mã giảm giá</h1>
+                                <p className={cx('banner-description')}>Quản lý các mã giảm giá trong cửa hàng</p>
+                            </div>
+                            <div className={cx('banner-icon')}>
+                                <ShoppingOutlined />
+                            </div>
+            </motion.div>
             <div className={cx('header')}>
-                <div className={cx('title-section')}>
+                
+                {/* <div className={cx('title-section')}>
                     <h2>Quản lý mã giảm giá</h2>
                     <p className={cx('subtitle')}>Quản lý các mã giảm giá trong cửa hàng</p>
-                </div>
+                </div> */}
                 <div className={cx('actions')}>
                     <Button
                         type="primary"

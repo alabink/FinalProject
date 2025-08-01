@@ -1,8 +1,8 @@
 import classNames from 'classnames/bind';
 import styles from './Wishlist.module.scss';
 import Header from '../../Components/Header/Header';
-import Footer from '../../../Components/Footer/Footer';
-import CardBody from '../../../Components/CardBody/CardBody';
+import Footer from '../../Components/Footer/Footer';
+import CardBody from '../../Components/CardBody/CardBody';
 import { useStore } from '../../hooks/useStore';
 import { Button, Empty, Row, Col } from 'antd';
 import { 
@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { requestAddToCart } from '../../Config/request';
-import { SUCCESS_TYPES } from '../../../Components/ProgressSuccess/SuccessProgress';
+import { SUCCESS_TYPES } from '../../Components/ProgressSuccess/SuccessProgress';
 
 const cx = classNames.bind(styles);
 

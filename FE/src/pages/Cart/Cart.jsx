@@ -1,7 +1,7 @@
 import classNames from 'classnames/bind';
 import styles from './Cart.module.scss';
 import Header from '../../Components/Header/Header';
-import Footer from '../../../Components/Footer/Footer';
+import Footer from '../../Components/Footer/Footer';
 
 import { Button, Form, Input, Card, Space, InputNumber, Badge, Tag, Divider } from 'antd';
 import { useEffect, useState } from 'react';
