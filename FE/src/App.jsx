@@ -3,7 +3,7 @@ import Header from './Components/Header/Header';
 import MainHome from './Components/MainHome/MainHome';
 import Footer from './Components/Footer/Footer';
 
-import Chatbot from './utils/chatbot';
+import Chatbot from './utils/Chatbot';
 import { useEffect } from 'react';
 
 function App() {
@@ -28,7 +28,7 @@ function App() {
                 <MainHome />
             </main>
 
-            <Chatbot />
+            {/* <Chatbot /> */}
 
             <footer>
                 <Footer />
