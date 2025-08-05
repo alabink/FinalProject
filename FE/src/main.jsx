@@ -8,6 +8,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 
 import { Provider } from './store/Provider';
 import ScrollToTop from './Components/ScrollToTop';
+import Chatbot from './utils/Chatbot'; // Import Chatbot
 
 // Set global loading indicator
 Spin.setDefaultIndicator(<CustomSpinner />);
@@ -22,21 +23,26 @@ function AppWrapper() {
     const location = useLocation();
     
     return (
-        <Routes>
-            {publicRoutes.map((route, index) => {
-                return (
-                    <Route 
-                        key={index} 
-                        path={route.path} 
-                        element={
-                            <div key={location.pathname}>
-                                {route.component}
-                            </div>
-                        } 
-                    />
-                );
-            })}
-        </Routes>
+        <>
+            <Routes>
+                {publicRoutes.map((route, index) => {
+                    return (
+                        <Route 
+                            key={index}
+                            path={route.path}
+                            element={
+                                <div key={location.pathname}>
+                                    {route.component}
+                                </div>
+                            } 
+                        />
+                    );
+                })}
+            </Routes>
+            
+            {/* Chatbot sẽ xuất hiện ở tất cả các trang */}
+            <Chatbot />
+        </>
     );
 }
 

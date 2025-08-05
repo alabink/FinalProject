@@ -336,61 +336,72 @@ class controllerProducts {
         new OK({ message: 'Tìm kiếm sản phẩm', metadata: data }).send(res);
     }
 
-    async filterProduct(req, res) {
-        const { categoryId, priceRange, pricedes } = req.query;
-        let query = {};
+async filterProduct(req, res) {
+    const { categoryId, priceRange, pricedes } = req.query;
+    let query = {};
 
-        // Filter by category if provided
-        if (categoryId) {
-            query.category = categoryId;
-        }
-
-        // Filter by price range if provided
-        if (priceRange) {
-            const priceQuery = {
-                $or: [
-                    // Case 1: When priceDiscount > 0, use priceDiscount
-                    {
-                        priceDiscount: { $gt: 0 },
-                        ...(priceRange === 'under20' && { priceDiscount: { $lt: 20000000 } }),
-                        ...(priceRange === '20to40' && { priceDiscount: { $gte: 20000000, $lte: 40000000 } }),
-                        ...(priceRange === 'above40' && { priceDiscount: { $gt: 40000000 } }),
-                    },
-                    // Case 2: When priceDiscount = 0, use price
-                    {
-                        $or: [{ priceDiscount: 0 }, { priceDiscount: null }],
-                        ...(priceRange === 'under20' && { price: { $lt: 20000000 } }),
-                        ...(priceRange === '20to40' && { price: { $gte: 20000000, $lte: 40000000 } }),
-                        ...(priceRange === 'above40' && { price: { $gt: 40000000 } }),
-                    },
-                ],
-            };
-
-            query = { ...query, ...priceQuery };
-        }
-
-        // Get products with filters
-        let products = await modelProduct.find(query);
-
-        // Sort by price if specified, considering priceDiscount
-        if (pricedes) {
-            products = products.sort((a, b) => {
-                const priceA = a.priceDiscount > 0 ? a.priceDiscount : a.price;
-                const priceB = b.priceDiscount > 0 ? b.priceDiscount : b.price;
-
-                if (pricedes === 'desc') {
-                    return priceB - priceA;
-                }
-                return priceA - priceB;
-            });
-        }
-
-        new OK({
-            message: 'Lọc sản phẩm thành công',
-            metadata: products,
-        }).send(res);
+    if (categoryId) {
+        query.category = categoryId;
     }
 
+    if (priceRange) {
+        const orClauses = [];
+
+        if (priceRange === 'under20') {
+            orClauses.push(
+                // priceDiscount > 0 và < 20tr
+                { priceDiscount: { $gt: 0, $lt: 20000000 } },
+                // priceDiscount = 0/null và price < 20tr
+                {
+                    $and: [
+                        { $or: [{ priceDiscount: 0 }, { priceDiscount: null }] },
+                        { price: { $lt: 20000000 } },
+                    ],
+                }
+            );
+        } else if (priceRange === '20to40') {
+            orClauses.push(
+                { priceDiscount: { $gte: 20000000, $lte: 40000000 } },
+                {
+                    $and: [
+                        { $or: [{ priceDiscount: 0 }, { priceDiscount: null }] },
+                        { price: { $gte: 20000000, $lte: 40000000 } },
+                    ],
+                }
+            );
+        } else if (priceRange === 'above40') {
+            orClauses.push(
+                { priceDiscount: { $gt: 40000000 } },
+                {
+                    $and: [
+                        { $or: [{ priceDiscount: 0 }, { priceDiscount: null }] },
+                        { price: { $gt: 40000000 } },
+                    ],
+                }
+            );
+        }
+
+        if (orClauses.length) {
+            query.$or = orClauses;
+        }
+    }
+
+    let products = await modelProduct.find(query);
+
+    if (pricedes) {
+        products = products.sort((a, b) => {
+            const priceA = a.priceDiscount > 0 ? a.priceDiscount : a.price;
+            const priceB = b.priceDiscount > 0 ? b.priceDiscount : b.price;
+            return pricedes === 'desc' ? priceB - priceA : priceA - priceB;
+        });
+    }
+
+    new OK({
+        message: 'Lọc sản phẩm thành công',
+        metadata: products,
+    }).send(res);
+}
+/// moi fix ne
     async getProductVariants(req, res) {
         const { productId } = req.query;
         

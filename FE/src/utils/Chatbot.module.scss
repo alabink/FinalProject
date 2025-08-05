@@ -382,6 +382,12 @@
     gap: 16px;
     max-height: 350px;
     overflow-y: auto;
+    // overflow-x: hidden;  /* ẩn cuộn ngang */
+     overscroll-behavior: contain;
+
+    // /* ẩn scrollbar nhưng vẫn scroll được */ moi sua de tat cai line tim
+    scrollbar-width: none;          /* Firefox */
+    -ms-overflow-style: none;       /* IE 10+ */
 }
 
 .productCard {
@@ -401,11 +407,16 @@
 }
 
 .productCard:hover {
-    border-color: rgba(102, 126, 234, 0.3);
-    box-shadow: 
-        0 8px 24px rgba(102, 126, 234, 0.15),
-        0 4px 12px rgba(0, 0, 0, 0.08);
-    transform: translateY(-2px);
+    // border-color: rgba(102, 126, 234, 0.3);
+    // box-shadow: 
+    //     0 8px 24px rgba(102, 126, 234, 0.15),
+    //     0 4px 12px rgba(0, 0, 0, 0.08);
+    // transform: translateY(-2px);
+    // fix hover vao sp
+ border-color: transparent !important;
+    box-shadow: none !important;
+    transform: none !important;
+    cursor: default;
 }
 
 .productImage {
@@ -425,7 +436,8 @@
 }
 
 .productImage:hover img {
-    transform: scale(1.1);
+    transform: none;
+    // fix hover anh sp
 }
 
 .productInfo {
@@ -821,7 +833,7 @@
     background: rgba(0, 0, 0, 0.02);
     border-radius: 8px;
 }
-
+// phần này chỉnh cái thanh tím ngang lên xuống 
 .productGrid::-webkit-scrollbar-thumb {
     background: linear-gradient(135deg, #667eea, #764ba2);
     border-radius: 8px;
