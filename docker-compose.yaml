@@ -1,6 +1,6 @@
 services:
     backend:
-        build: ./server
+        build: ./BE
         container_name: backend
         restart: always
         command: sh -c "npm install && npm run dev"
