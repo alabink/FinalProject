@@ -19,6 +19,9 @@ function App() {
         };
     }, []);
 
+    console.log("App component rendered");
+    
+
     return (
         <div className="App">
             <header>
