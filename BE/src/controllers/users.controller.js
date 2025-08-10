@@ -1,5 +1,6 @@
 const modelUser = require('../models/users.model');
 const modelPayments = require('../models/payments.model');
+const modelProduct = require('../models/products.model');
 const modelApiKey = require('../models/apiKey.model');
 const modelOtp = require('../models/otp.model');
 
@@ -359,6 +360,119 @@ class controllerUsers {
         const { id, fullName, email, phone, isAdmin } = req.body;
         await modelUser.updateOne({ _id: id }, { fullName, email, phone, isAdmin });
         new OK({ message: 'Cập nhật thông tin người dùng thành công' }).send(res);
+    }
+
+    async getAdminStats(req, res) {
+        try {
+            // Lấy tổng số người dùng
+            const totalUsers = await modelUser.countDocuments();
+
+            // Lấy tất cả đơn hàng và sắp xếp theo ngày tạo
+            const allOrders = await modelPayments.find().sort({ createdAt: -1 });
+
+            // Thống kê trạng thái đơn hàng
+            const newOrders = allOrders.filter(order => order.statusOrder === 'pending').length;
+            const processingOrders = allOrders.filter(order => order.statusOrder === 'completed').length;
+            const completedOrders = allOrders.filter(order => order.statusOrder === 'delivered').length;
+
+            // Tính doanh thu hôm nay
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            const todayOrders = allOrders.filter(order => {
+                const orderDate = new Date(order.createdAt);
+                return orderDate >= today && orderDate < tomorrow && order.statusOrder === 'delivered';
+            });
+
+            const todayRevenue = todayOrders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
+
+            // Tính doanh thu 7 ngày gần đây
+            const weeklyRevenue = [];
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                date.setHours(0, 0, 0, 0);
+                
+                const nextDay = new Date(date);
+                nextDay.setDate(nextDay.getDate() + 1);
+
+                const dayOrders = allOrders.filter(order => {
+                    const orderDate = new Date(order.createdAt);
+                    return orderDate >= date && orderDate < nextDay;
+                });
+
+                const dailyRevenue = dayOrders
+                    .filter(order => order.statusOrder === 'delivered')
+                    .reduce((sum, order) => sum + (order.totalPrice || 0), 0);
+
+                const orderCount = dayOrders.length;
+
+                weeklyRevenue.push({
+                    dayLabel: date.toLocaleDateString('vi-VN', { 
+                        weekday: 'short', 
+                        month: 'short', 
+                        day: 'numeric' 
+                    }),
+                    dailyRevenue,
+                    orderCount
+                });
+            }
+
+            // Lấy 10 đơn hàng gần đây nhất với thông tin sản phẩm
+            const recentOrdersWithProducts = await Promise.all(
+                allOrders.slice(0, 10).map(async (order) => {
+                    let productName = 'Không có sản phẩm';
+                    
+                    if (order.products && order.products.length > 0) {
+                        try {
+                            const firstProduct = await modelProduct.findById(order.products[0].productId);
+                            if (firstProduct) {
+                                productName = firstProduct.name;
+                                if (order.products.length > 1) {
+                                    productName += ` và ${order.products.length - 1} sản phẩm khác`;
+                                }
+                            }
+                        } catch (error) {
+                            productName = 'Sản phẩm không tồn tại';
+                        }
+                    }
+
+                    return {
+                        key: order._id,
+                        order: order.orderId,
+                        customer: order.fullName,
+                        product: productName,
+                        amount: order.totalPrice,
+                        status: order.statusOrder === 'pending' ? 'Chờ xử lý' :
+                                order.statusOrder === 'completed' ? 'Đã xác nhận' :
+                                order.statusOrder === 'shipping' ? 'Đang giao' :
+                                order.statusOrder === 'delivered' ? 'Đã giao' :
+                                order.statusOrder === 'cancelled' ? 'Đã hủy' : 'Không xác định'
+                    };
+                })
+            );
+
+            const stats = {
+                totalUsers,
+                newOrders,
+                processingOrders,
+                completedOrders,
+                todayRevenue,
+                weeklyRevenue,
+                recentOrders: recentOrdersWithProducts
+            };
+
+            new OK({ 
+                message: 'Lấy thống kê thành công', 
+                metadata: stats 
+            }).send(res);
+
+        } catch (error) {
+            console.error('Error in getAdminStats:', error);
+            throw new BadRequestError('Không thể lấy thống kê admin');
+        }
     }
 }
 

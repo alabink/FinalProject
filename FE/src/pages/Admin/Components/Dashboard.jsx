@@ -213,6 +213,73 @@ const Dashboard = () => {
 
     return (
         <div className={cx('dashboard')}>
+            {/* Statistics Cards */}
+            <div className={cx('stats-grid')}>
+                <Card className={cx('stat-card')}>
+                    <div className={cx('stat-header')}>
+                        <h4 className={cx('stat-title')}>Tổng người dùng</h4>
+                        <div className={cx('stat-icon', 'users')}>
+                            <UserOutlined />
+                        </div>
+                    </div>
+                    <div className={cx('stat-value')}>
+                        {stats.totalUsers?.toLocaleString() || '0'}
+                    </div>
+                    <div className={cx('stat-description')}>
+                        <ArrowUpOutlined className={cx('trend-icon', 'up')} />
+                        Tổng số người dùng đã đăng ký
+                    </div>
+                </Card>
+
+                <Card className={cx('stat-card')}>
+                    <div className={cx('stat-header')}>
+                        <h4 className={cx('stat-title')}>Đơn hàng mới</h4>
+                        <div className={cx('stat-icon', 'orders')}>
+                            <ShoppingCartOutlined />
+                        </div>
+                    </div>
+                    <div className={cx('stat-value')}>
+                        {stats.newOrders?.toLocaleString() || '0'}
+                    </div>
+                    <div className={cx('stat-description')}>
+                        <ArrowUpOutlined className={cx('trend-icon', 'up')} />
+                        Đơn hàng chờ xác nhận
+                    </div>
+                </Card>
+
+                <Card className={cx('stat-card')}>
+                    <div className={cx('stat-header')}>
+                        <h4 className={cx('stat-title')}>Đang xử lý</h4>
+                        <div className={cx('stat-icon', 'processing')}>
+                            <SyncOutlined />
+                        </div>
+                    </div>
+                    <div className={cx('stat-value')}>
+                        {stats.processingOrders?.toLocaleString() || '0'}
+                    </div>
+                    <div className={cx('stat-description')}>
+                        <SyncOutlined className={cx('trend-icon')} />
+                        Đơn hàng đang được xử lý
+                    </div>
+                </Card>
+
+                <Card className={cx('stat-card')}>
+                    <div className={cx('stat-header')}>
+                        <h4 className={cx('stat-title')}>Doanh thu hôm nay</h4>
+                        <div className={cx('stat-icon', 'revenue')}>
+                            <DollarOutlined />
+                        </div>
+                    </div>
+                    <div className={cx('stat-value')}>
+                        {stats.todayRevenue?.toLocaleString() || '0'} VNĐ
+                    </div>
+                    <div className={cx('stat-description')}>
+                        <ArrowUpOutlined className={cx('trend-icon', 'up')} />
+                        Doanh thu trong ngày
+                    </div>
+                </Card>
+            </div>
+
             <div className={cx('chart-section')}>
                 <div className={cx('chart-header')}>
                     <h3>Thống kê doanh thu và đơn hàng</h3>
