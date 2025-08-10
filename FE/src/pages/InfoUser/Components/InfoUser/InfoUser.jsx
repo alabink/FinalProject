@@ -107,7 +107,7 @@ function InfoUser({ isOpen, setIsOpen, activeTab }) {
             // Set file for upload
             setAvatar(file);
 
-            // Create preview URL
+            // Create preview URL from local file temporarily
             const reader = new FileReader();
             reader.readAsDataURL(file);
             reader.onload = () => {
@@ -118,7 +118,7 @@ function InfoUser({ isOpen, setIsOpen, activeTab }) {
         },
         onRemove: () => {
             setAvatar(null);
-            setAvatarPreview(null);
+            setAvatarPreview(DEFAULT_AVATAR_URL);
         }
     };
 

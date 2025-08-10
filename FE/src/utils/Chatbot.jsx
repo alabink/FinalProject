@@ -262,7 +262,7 @@ const Chatbot = () => {
                                         {message.sender === 'user' ? (
                                             dataUser?.avatar ? (
                                                 <img
-                                                    src={`${import.meta.env.VITE_API_URL_IMG}/uploads/avatars/${dataUser.avatar}`}
+                                                    src={dataUser.avatar}
                                                     alt={dataUser.fullName || 'User'}
                                                     className={styles.userAvatarImage}
                                                 />
