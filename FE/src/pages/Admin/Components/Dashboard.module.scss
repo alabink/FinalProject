@@ -23,12 +23,10 @@
 }
 
 .stats-grid {
-    display: grid !important;
+    display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 2.8rem;
     margin-bottom: 3.5rem;
-    animation: fadeInUp 0.8s cubic-bezier(.25,1,.5,1) 0.1s forwards;
-    opacity: 1;
     
     @media (max-width: 1200px) {
         grid-template-columns: repeat(2, 1fr);
