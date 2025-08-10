@@ -176,7 +176,7 @@ export const requestAdmin = async () => {
 };
 
 export const requestAskQuestion = async (data) => {
-    const res = await request.post('/chat', data);
+    const res = await request.post('/api/chat', data);
     return res.data;
 };
 
