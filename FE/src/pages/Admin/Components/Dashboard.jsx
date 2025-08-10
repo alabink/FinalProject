@@ -51,6 +51,7 @@ const Dashboard = () => {
         setIsLoading(true);
         try {
             const response = await requestGetAdminStats();
+            console.log('Admin stats response:', response);
             setStats(response.metadata);
         } catch (error) {
             console.error('Error fetching stats:', error);
@@ -64,6 +65,10 @@ const Dashboard = () => {
         const interval = setInterval(fetchStats, 5 * 60 * 1000);
         return () => clearInterval(interval);
     }, []);
+
+    useEffect(() => {
+        console.log('Stats state updated:', stats);
+    }, [stats]);
 
     const revenueData = {
         labels: stats.weeklyRevenue.map((day) => day.dayLabel),
@@ -211,11 +216,30 @@ const Dashboard = () => {
         </Menu>
     );
 
+    console.log('Dashboard rendering, isLoading:', isLoading, 'stats:', stats);
+    
     return (
         <div className={cx('dashboard')}>
+            {/* Debug info */}
+            <div style={{ padding: '10px', background: '#f0f0f0', marginBottom: '20px', fontSize: '12px' }}>
+                Debug: Loading={isLoading ? 'true' : 'false'}, TotalUsers={stats.totalUsers || 'undefined'}
+            </div>
+            
             {/* Statistics Cards */}
-            <div className={cx('stats-grid')}>
-                <Card className={cx('stat-card')}>
+            <div 
+                className={cx('stats-grid')}
+                data-testid="stats-grid"
+                style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                    gap: '2rem',
+                    marginBottom: '3rem',
+                    opacity: 1,
+                    visibility: 'visible',
+                    minHeight: '200px'
+                }}
+            >
+                <Card className={cx('stat-card')} loading={isLoading}>
                     <div className={cx('stat-header')}>
                         <h4 className={cx('stat-title')}>Tổng người dùng</h4>
                         <div className={cx('stat-icon', 'users')}>
@@ -231,7 +255,7 @@ const Dashboard = () => {
                     </div>
                 </Card>
 
-                <Card className={cx('stat-card')}>
+                <Card className={cx('stat-card')} loading={isLoading}>
                     <div className={cx('stat-header')}>
                         <h4 className={cx('stat-title')}>Đơn hàng mới</h4>
                         <div className={cx('stat-icon', 'orders')}>
@@ -247,7 +271,7 @@ const Dashboard = () => {
                     </div>
                 </Card>
 
-                <Card className={cx('stat-card')}>
+                <Card className={cx('stat-card')} loading={isLoading}>
                     <div className={cx('stat-header')}>
                         <h4 className={cx('stat-title')}>Đang xử lý</h4>
                         <div className={cx('stat-icon', 'processing')}>
@@ -263,7 +287,7 @@ const Dashboard = () => {
                     </div>
                 </Card>
 
-                <Card className={cx('stat-card')}>
+                <Card className={cx('stat-card')} loading={isLoading}>
                     <div className={cx('stat-header')}>
                         <h4 className={cx('stat-title')}>Doanh thu hôm nay</h4>
                         <div className={cx('stat-icon', 'revenue')}>
