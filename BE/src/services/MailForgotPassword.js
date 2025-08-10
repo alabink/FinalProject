@@ -4,77 +4,80 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 
+const {Resend} = require('resend')
+const resend  = new Resend(process.env.RESEND_API_KEY);
+
 // Fallback values for environment variables
-const CLIENT_ID = process.env.CLIENT_ID || '';
-const CLIENT_SECRET = process.env.CLIENT_SECRET || '';
-const REDIRECT_URI = process.env.REDIRECT_URI || 'https://developers.google.com/oauthplayground';
-const REFRESH_TOKEN = process.env.REFRESH_TOKEN || '';
-const USER_EMAIL = process.env.USER_EMAIL || 'noreply@techify.com';
+// const CLIENT_ID = process.env.CLIENT_ID || '';
+// const CLIENT_SECRET = process.env.CLIENT_SECRET || '';
+// const REDIRECT_URI = process.env.REDIRECT_URI || 'https://developers.google.com/oauthplayground';
+// const REFRESH_TOKEN = process.env.REFRESH_TOKEN || '';
+// const USER_EMAIL = process.env.USER_EMAIL || 'noreply@techify.com';
 
 // Create OAuth2 client with error handling
-let oAuth2Client;
-try {
-    oAuth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
-    oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
-} catch (error) {
-    console.error('Error creating OAuth2 client:', error);
-}
+// let oAuth2Client;
+// try {
+//     oAuth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
+//     oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
+// } catch (error) {
+//     console.error('Error creating OAuth2 client:', error);
+// }
 
-// Create a fallback transporter for testing/development
-const createFallbackTransporter = () => {
-    return nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
-        port: 587,
-        secure: false,
-        auth: {
-            user: USER_EMAIL,
-            pass: 'testpassword'
-        }
-    });
-};
+// // Create a fallback transporter for testing/development
+// const createFallbackTransporter = () => {
+//     return nodemailer.createTransport({
+//         host: 'smtp.ethereal.email',
+//         port: 587,
+//         secure: false,
+//         auth: {
+//             user: USER_EMAIL,
+//             pass: 'testpassword'
+//         }
+//     });
+// };
 
 // Function to get logo as base64
-const getLogoBase64 = () => {
-    try {
-        // Path to logo file
-        const logoPath = path.join(__dirname, '../uploads/logo1.png');
-        // Read file as buffer
-        const logoBuffer = fs.readFileSync(logoPath);
-        // Convert to base64
-        return `data:image/png;base64,${logoBuffer.toString('base64')}`;
-    } catch (error) {
-        console.error('Error reading logo file:', error);
-        // Return empty string if error
-        return '';
-    }
-};
+// const getLogoBase64 = () => {
+//     try {
+//         // Path to logo file
+//         const logoPath = path.join(__dirname, '../uploads/logo1.png');
+//         // Read file as buffer
+//         const logoBuffer = fs.readFileSync(logoPath);
+//         // Convert to base64
+//         return `data:image/png;base64,${logoBuffer.toString('base64')}`;
+//     } catch (error) {
+//         console.error('Error reading logo file:', error);
+//         // Return empty string if error
+//         return '';
+//     }
+// };
 
 const MailForgotPassword = async (email, otp) => {
     try {
         // Check if OAuth2 client is properly configured
-        if (!CLIENT_ID || !CLIENT_SECRET || !REFRESH_TOKEN || !USER_EMAIL) {
-            console.warn('Email credentials not properly configured. Using fallback transporter.');
-            throw new Error('Email credentials not properly configured');
-        }
+        // if (!CLIENT_ID || !CLIENT_SECRET || !REFRESH_TOKEN || !USER_EMAIL) {
+        //     console.warn('Email credentials not properly configured. Using fallback transporter.');
+        //     throw new Error('Email credentials not properly configured');
+        // }
         
-        // Get access token
-        const accessToken = await oAuth2Client.getAccessToken();
+        // // Get access token
+        // const accessToken = await oAuth2Client.getAccessToken();
         
-        // Get logo as base64
-        const logoBase64 = getLogoBase64();
+        // // Get logo as base64
+        // const logoBase64 = getLogoBase64();
         
-        // Create transporter with OAuth2
-        const transport = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                type: 'OAuth2',
-                user: USER_EMAIL,
-                clientId: CLIENT_ID,
-                clientSecret: CLIENT_SECRET,
-                refreshToken: REFRESH_TOKEN,
-                accessToken: accessToken,
-            },
-        });
+        // // Create transporter with OAuth2
+        // const transport = nodemailer.createTransport({
+        //     service: 'gmail',
+        //     auth: {
+        //         type: 'OAuth2',
+        //         user: USER_EMAIL,
+        //         clientId: CLIENT_ID,
+        //         clientSecret: CLIENT_SECRET,
+        //         refreshToken: REFRESH_TOKEN,
+        //         accessToken: accessToken,
+        //     },
+        // });
         
         // Email Template - Simplified for wider compatibility
         const htmlTemplate = `
@@ -473,44 +476,57 @@ const MailForgotPassword = async (email, otp) => {
             </html>
         `;
         
-        // Send email with OAuth2 transporter
-        const result = await transport.sendMail({
-            from: `"Techify" <${USER_EMAIL}>`,
+        // // Send email with OAuth2 transporter
+        // const result = await transport.sendMail({
+        //     from: `"Techify" <${USER_EMAIL}>`,
+        //     to: email,
+        //     subject: '🔐 Mã xác thực khôi phục mật khẩu - Techify',
+        //     text: `Bạn đã yêu cầu khôi phục mật khẩu cho tài khoản Techify. Mã OTP của bạn là: ${otp}. Mã này có hiệu lực trong 5 phút. Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email.`,
+        //     html: htmlTemplate,
+        //     attachments: [
+        //         {
+        //             filename: 'logo.png',
+        //             content: Buffer.from(logoBase64.split('base64,')[1], 'base64'),
+        //             cid: 'logo',
+        //             contentDisposition: 'inline'
+        //         }
+        //     ]
+        // });
+        
+        // console.log('Email sent successfully:', result.messageId);
+        // return result;
+
+        resend.emails.send({
+            from: `"Techify" <noreply@techify.asia>`,
             to: email,
             subject: '🔐 Mã xác thực khôi phục mật khẩu - Techify',
-            text: `Bạn đã yêu cầu khôi phục mật khẩu cho tài khoản Techify. Mã OTP của bạn là: ${otp}. Mã này có hiệu lực trong 5 phút. Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email.`,
-            html: htmlTemplate,
-            attachments: [
-                {
-                    filename: 'logo.png',
-                    content: Buffer.from(logoBase64.split('base64,')[1], 'base64'),
-                    cid: 'logo',
-                    contentDisposition: 'inline'
-                }
-            ]
-        });
-        
-        console.log('Email sent successfully:', result.messageId);
-        return result;
+            html  : htmlTemplate,
+        })
     } catch (error) {
         console.error('Error sending email with OAuth2:', error);
         
         // Improved fallback transporter for compatibility with other email services
         try {
-            console.log('Attempting to send with fallback transporter...');
-            const fallbackTransport = createFallbackTransporter();
+            // console.log('Attempting to send with fallback transporter...');
+            // const fallbackTransport = createFallbackTransporter();
             
-            // Create simple HTML for maximum compatibility
-            const result = await fallbackTransport.sendMail({
-                from: `"Techify" <${USER_EMAIL}>`,
-                to: email,
-                subject: '🔐 Mã xác thực khôi phục mật khẩu - Techify',
-                text: `Bạn đã yêu cầu khôi phục mật khẩu cho tài khoản Techify. Mã OTP của bạn là: ${otp}. Mã này có hiệu lực trong 5 phút. Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email.`,
-                html: simpleHtml
-            });
+            // // Create simple HTML for maximum compatibility
+            // const result = await fallbackTransport.sendMail({
+            //     from: `"Techify" <${USER_EMAIL}>`,
+            //     to: email,
+            //     subject: '🔐 Mã xác thực khôi phục mật khẩu - Techify',
+            //     text: `Bạn đã yêu cầu khôi phục mật khẩu cho tài khoản Techify. Mã OTP của bạn là: ${otp}. Mã này có hiệu lực trong 5 phút. Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email.`,
+            //     html: simpleHtml
+            // });
             
-            console.log('Email sent with fallback transporter:', result.messageId);
-            return result;
+            // console.log('Email sent with fallback transporter:', result.messageId);
+            // return result;
+            resend.emails.send({
+            from: `"Techify" <noreply@techify.asia>`,
+            to: email,
+            subject: '🔐 Mã xác thực khôi phục mật khẩu - Techify',
+            html  : simpleHtml,
+        })
         } catch (fallbackError) {
             console.error('Fallback email sending failed:', fallbackError);
             throw new Error('Không thể gửi email. Vui lòng kiểm tra cấu hình email hoặc thử lại sau.');
