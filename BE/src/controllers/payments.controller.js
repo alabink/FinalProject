@@ -636,8 +636,16 @@ class PaymentsController {
                         }),
                     );
 
+                    // Tạo mã đơn hàng từ timestamp và ObjectId
+                    const orderDate = new Date(order.createdAt);
+                    const dateStr = orderDate.getFullYear().toString().slice(-2) + 
+                                   (orderDate.getMonth() + 1).toString().padStart(2, '0') + 
+                                   orderDate.getDate().toString().padStart(2, '0');
+                    const orderCode = 'DH' + dateStr + order._id.toString().substring(18, 24).toUpperCase();
+
                     return {
-                        orderId: order._id,
+                        orderId: orderCode,
+                        originalId: order._id, // Giữ lại ID gốc để update status
                         userId: order.userId,
                         fullName: order.fullName,
                         phone: order.phone,

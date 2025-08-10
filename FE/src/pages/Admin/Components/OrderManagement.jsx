@@ -111,7 +111,7 @@ const OrderManagement = () => {
     ];
 
     const handleShowModal = (order) => {
-        setSelectedOrder(order.id);
+        setSelectedOrder(order.originalId);
         setIsModalVisible(true);
     };
 
@@ -154,11 +154,11 @@ const OrderManagement = () => {
             title: 'Mã đơn hàng',
             dataIndex: 'id',
             key: 'id',
-            width: 220,
+            width: 160,
             render: (id) => (
                 <Tooltip title={id}>
                     <div className={cx('order-id')}>
-                        <span className={cx('id-text')}>{id.substring(0, 8)}...</span>
+                        <span className={cx('id-text')}>{id}</span>
                         <Badge status="processing" className={cx('id-badge')} />
                     </div>
                 </Tooltip>
@@ -260,7 +260,7 @@ const OrderManagement = () => {
                 <Select
                     value={status}
                     style={{ width: 150 }}
-                    onChange={(value) => handleUpdateStatus(record.id, value)}
+                    onChange={(value) => handleUpdateStatus(record.originalId, value)}
                         options={statusOptions.map(option => ({
                             ...option,
                             label: (
@@ -313,8 +313,9 @@ const OrderManagement = () => {
             const orderList = response.metadata?.detailedPayments || response.metadata || [];
             if (Array.isArray(orderList)) {
                 const formattedOrders = orderList.map((order) => ({
-                    key: order.orderId,
+                    key: order.originalId || order.orderId,
                     id: order.orderId,
+                    originalId: order.originalId || order.orderId, // Để update status
                     customer: order.fullName,
                     phone: `0${order.phone}`,
                     address: order.address,
