@@ -82,7 +82,7 @@ function routes(app) {
     app.use('/api', recommendationRoutes);
 
     // Chatbot route
-    app.post('/chat', async (req, res) => {
+    app.post('/api/chat', async (req, res) => {
         try {
             const { question, userId } = req.body;
             const answer = await askQuestion(question, userId);
