@@ -8,6 +8,7 @@
     "setup-recommendation": "node setup_recommendation.js",
     "check-api": "node check_api_endpoints.js",
     "test-python": "node test_python.js",
+
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "build": "npm run install-python-deps && npm run setup-recommendation && npm run check-api && npm run start"

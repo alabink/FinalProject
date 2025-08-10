@@ -30,67 +30,182 @@ function getImageUrl(imagePath) {
 //
 
 
-async function getAllDatabaseData() {
+// Tối ưu hóa: Truy vấn thông minh chỉ lấy sản phẩm liên quan
+async function getRelevantProducts(query, limit = 5) {
     try {
-        const [products, categories] = await Promise.all([
-            modelProduct.find({}).populate('category'),
-            modelCategory.find({})
-        ]);
+        // Tách từ khóa và làm sạch
+        const keywords = query.toLowerCase()
+            .split(' ')
+            .filter(word => word.length > 1)
+            .map(word => word.trim());
 
-        return {
-            products: products.map(product => ({
-                id: product._id.toString(),
-                name: product.name,
-                price: product.price,
-                priceDiscount: product.priceDiscount,
-                description: product.description,
-                attributes: product.attributes,
-                stock: product.stock,
-                rating: product.rating,
-                category: product.category,
-                images: product.images?.map(img => getImageUrl(img)) || [DEFAULT_IMAGE],
-                slug: product.slug || product._id.toString()
-            })),
-            categories: categories.map(cat => ({
-                id: cat._id.toString(),
-                name: cat.name,
-                description: cat.description
-            }))
-        };
+        if (keywords.length === 0) {
+            // Nếu không có từ khóa cụ thể, trả về sản phẩm phổ biến
+            const products = await modelProduct
+                .find({})
+                .populate('category')
+                .sort({ createdAt: -1 })
+                .limit(limit)
+                .lean(); // Thêm .lean() để tăng performance
+            
+            return products.map(product => formatProduct(product));
+        }
+
+        // Tạo regex pattern cho tìm kiếm linh hoạt
+        const regexPatterns = keywords.map(keyword => new RegExp(keyword, 'i'));
+        
+        // Tạo aggregation pipeline tối ưu
+        const pipeline = [
+            {
+                $lookup: {
+                    from: 'categories',
+                    localField: 'category',
+                    foreignField: '_id',
+                    as: 'category'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$category',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $addFields: {
+                    // Tính điểm relevance dựa trên sự xuất hiện của từ khóa
+                    relevanceScore: {
+                        $add: [
+                            // Điểm từ tên sản phẩm (trọng số cao nhất)
+                            {
+                                $multiply: [
+                                    { $size: {
+                                        $filter: {
+                                            input: regexPatterns,
+                                            cond: { $regexMatch: { input: '$name', regex: '$$this' } }
+                                        }
+                                    }},
+                                    10
+                                ]
+                            },
+                            // Điểm từ brand
+                            {
+                                $multiply: [
+                                    { $size: {
+                                        $filter: {
+                                            input: regexPatterns,
+                                            cond: { $regexMatch: { input: '$brand', regex: '$$this' } }
+                                        }
+                                    }},
+                                    8
+                                ]
+                            },
+                            // Điểm từ mô tả
+                            {
+                                $multiply: [
+                                    { $size: {
+                                        $filter: {
+                                            input: regexPatterns,
+                                            cond: { $regexMatch: { input: { $ifNull: ['$description', ''] }, regex: '$$this' } }
+                                        }
+                                    }},
+                                    3
+                                ]
+                            },
+                            // Điểm từ category
+                            {
+                                $multiply: [
+                                    { $size: {
+                                        $filter: {
+                                            input: regexPatterns,
+                                            cond: { $regexMatch: { input: { $ifNull: ['$category.nameCategory', ''] }, regex: '$$this' } }
+                                        }
+                                    }},
+                                    5
+                                ]
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                $match: {
+                    $or: [
+                        { name: { $in: regexPatterns } },
+                        { brand: { $in: regexPatterns } },
+                        { description: { $in: regexPatterns } },
+                        { 'category.nameCategory': { $in: regexPatterns } },
+                        { relevanceScore: { $gt: 0 } }
+                    ]
+                }
+            },
+            {
+                $sort: { 
+                    relevanceScore: -1, 
+                    createdAt: -1 
+                }
+            },
+            {
+                $limit: limit
+            }
+        ];
+
+        const products = await modelProduct.aggregate(pipeline);
+        return products.map(product => formatProduct(product));
+
     } catch (error) {
-        console.error('Error getting database data:', error);
-        return { products: [], categories: [] };
+        console.error('Error in getRelevantProducts:', error);
+        // Fallback: trả về một vài sản phẩm ngẫu nhiên
+        try {
+            const fallbackProducts = await modelProduct
+                .find({})
+                .populate('category')
+                .limit(limit);
+            return fallbackProducts.map(product => formatProduct(product));
+        } catch (fallbackError) {
+            console.error('Fallback query also failed:', fallbackError);
+            return [];
+        }
     }
 }
 
-// Hàm tìm kiếm sản phẩm thông minh
-async function smartProductSearch(query) {
+// Helper function để format product data
+function formatProduct(product) {
+    return {
+        id: product._id.toString(),
+        name: product.name,
+        brand: product.brand,
+        price: product.price,
+        priceDiscount: product.priceDiscount,
+        description: product.description,
+        attributes: product.attributes,
+        variants: product.variants || [], // Đảm bảo variants được bao gồm
+        stock: product.stock,
+        rating: product.rating,
+        category: product.category,
+        images: product.images?.map(img => getImageUrl(img)) || [DEFAULT_IMAGE],
+        slug: product.slug || product._id.toString()
+    };
+}
+
+// Hàm lấy categories (ít khi thay đổi nên có thể cache)
+async function getCategories() {
     try {
-        const products = await modelProduct.find({}).populate('category');
-        const searchTerms = query.toLowerCase().split(' ').filter(term => term.length > 1);
-        
-        return products.filter(product => {
-            const searchText = [
-                product.name,
-                product.description || '',
-                Object.values(product.attributes || {}).join(' '),
-                product.category?.nameCategory || ''
-            ].join(' ').toLowerCase();
-            
-            return searchTerms.some(term => searchText.includes(term));
-        }).sort((a, b) => {
-            // Ưu tiên sản phẩm có tên chứa từ khóa
-            const aNameMatch = searchTerms.some(term => a.name.toLowerCase().includes(term));
-            const bNameMatch = searchTerms.some(term => b.name.toLowerCase().includes(term));
-            
-            if (aNameMatch && !bNameMatch) return -1;
-            if (!aNameMatch && bNameMatch) return 1;
-            return 0;
-        });
+        const categories = await modelCategory.find({}).lean(); // .lean() để tăng performance
+        return categories.map(cat => ({
+            id: cat._id.toString(),
+            name: cat.nameCategory || cat.name,
+            description: cat.description
+        }));
     } catch (error) {
-        console.error('Error in smart product search:', error);
+        console.error('Error getting categories:', error);
         return [];
     }
+}
+
+// Hàm tìm kiếm sản phẩm thông minh (sử dụng hệ thống mới)
+async function smartProductSearch(query, limit = 5) {
+    // Sử dụng hàm getRelevantProducts đã được tối ưu
+    return await getRelevantProducts(query, limit);
 }
 
 // Hàm phân tích câu hỏi và tìm intent
@@ -100,6 +215,16 @@ function analyzeQuestion(question) {
             patterns: [
                 /iphone|samsung|xiaomi|oppo|vivo|huawei|nokia|realme/i,
                 /\d+\s*(gb|tb|pro|max|plus|mini)/i
+            ],
+            confidence: 0.9
+        },
+        variant_inquiry: {
+            patterns: [
+                /màu|color|colours/i,
+                /phiên bản|version|variant/i,
+                /bộ nhớ|storage|gb|tb/i,
+                /có mấy màu|có những màu|màu nào|màu gì/i,
+                /có mấy phiên bản|phiên bản nào/i
             ],
             confidence: 0.9
         },
@@ -152,7 +277,7 @@ function analyzeQuestion(question) {
 }
 
 // Hàm tạo context thông minh
-function buildIntelligentContext(userId, question, dbData) {
+async function buildIntelligentContext(userId, question, dbData) {
     if (!userContext.has(userId)) {
         userContext.set(userId, {
             currentProducts: [],
@@ -169,11 +294,11 @@ function buildIntelligentContext(userId, question, dbData) {
         context.lastIntent = intents[0].intent;
     }
 
-    // Tìm sản phẩm được đề cập trong câu hỏi
-    const mentionedProducts = smartProductSearch(question);
-    console.log ("mentionedProducts:",mentionedProducts)
+    // Tìm sản phẩm được đề cập trong câu hỏi (tối ưu hóa với limit)
+    const mentionedProducts = await smartProductSearch(question, 3);
+    console.log("mentionedProducts:", mentionedProducts);
     if (mentionedProducts.length > 0) {
-        context.currentProducts = mentionedProducts.slice(0, 3); // Lấy top 3 sản phẩm liên quan
+        context.currentProducts = mentionedProducts; // Đã được giới hạn trong smartProductSearch
     }
 
     // Phân tích preferences
@@ -210,19 +335,37 @@ function buildIntelligentContext(userId, question, dbData) {
     return context;
 }
 
-// Hàm tạo prompt thông minh cho AI
-function createIntelligentPrompt(question, context, dbData) {
-    const { products, categories } = dbData;
-    
-    const productInfo = products.map(product => `
+// Hàm tạo prompt thông minh cho AI (tối ưu hóa)
+async function createIntelligentPrompt(question, context, relevantProducts, categories) {
+    // Chỉ sử dụng sản phẩm liên quan thay vì toàn bộ database
+    const productInfo = relevantProducts.map(product => {
+        // Xử lý thông tin variants (màu sắc và bộ nhớ)
+        let variantInfo = '';
+        if (product.variants && product.variants.length > 0) {
+            const colors = [...new Set(product.variants.map(v => v.color.name))];
+            const storages = [...new Set(product.variants.map(v => v.storage.size))];
+            const priceRange = {
+                min: Math.min(...product.variants.map(v => v.priceDiscount || v.price)),
+                max: Math.max(...product.variants.map(v => v.price))
+            };
+            
+            variantInfo = `
+Màu sắc có sẵn: ${colors.join(', ')}
+Phiên bản bộ nhớ: ${storages.join(', ')}
+Khoảng giá: ${priceRange.min.toLocaleString('vi-VN')}đ - ${priceRange.max.toLocaleString('vi-VN')}đ`;
+        }
+
+        return `
 ID: ${product.id}
 Tên: ${product.name}
-Giá: ${product.price.toLocaleString('vi-VN')}đ${product.priceDiscount ? ` (Giảm giá: ${product.priceDiscount.toLocaleString('vi-VN')}đ)` : ''}
+Brand: ${product.brand}
+Giá: ${product.price?.toLocaleString('vi-VN') || 'N/A'}đ${product.priceDiscount ? ` (Giảm giá: ${product.priceDiscount.toLocaleString('vi-VN')}đ)` : ''}
 Mô tả: ${product.description || 'Không có mô tả'}
-Thông số: ${Object.entries(product.attributes || {}).map(([k, v]) => `${k}: ${v}`).join(', ')}
+Thông số: ${Object.entries(product.attributes || {}).map(([k, v]) => `${k}: ${v}`).join(', ')}${variantInfo}
 Ảnh: ${product.images?.[0] || DEFAULT_IMAGE}
 Slug: ${product.slug}
-`).join('\n---\n');
+`;
+    }).join('\n---\n');
 
     const categoryInfo = categories.map(cat => `
 Danh mục: ${cat.name}
@@ -269,6 +412,7 @@ QUY TẮC TRẢ LỜI QUAN TRỌNG:
    - Hỏi sản phẩm cụ thể: Kiểm tra có trong danh sách không
    - So sánh sản phẩm: Chỉ so sánh những sản phẩm có trong cửa hàng
    - Tư vấn: Chỉ đề xuất sản phẩm có trong danh sách
+   - HỎI VỀ MÀU SẮC/PHIÊN BẢN: Trả lời dạng TEXT thông thường, KHÔNG dùng JSON format
 
 4. YÊU CẦU ĐỊNH DẠNG:
    - TUYỆT ĐỐI KHÔNG sử dụng các ký tự đặc biệt như **, ##, --, ==
@@ -278,7 +422,13 @@ QUY TẮC TRẢ LỜI QUAN TRỌNG:
    - Không đề cập đến từ "database"
 
 5. KHI TRẢ LỜI VỀ SẢN PHẨM:
-   - Nếu câu hỏi liên quan đến sản phẩm cụ thể, hãy trả lời với format JSON đặc biệt:
+   - QUAN TRỌNG: Nếu câu hỏi về MÀU SẮC, PHIÊN BẢN, BỘ NHỚ của sản phẩm:
+     * Trả lời dạng TEXT thông thường
+     * Liệt kê đầy đủ các màu sắc và phiên bản có sẵn
+     * Không sử dụng JSON format
+     * Không hiển thị ảnh hay link sản phẩm
+   
+   - Nếu câu hỏi về GIỚI THIỆU sản phẩm cụ thể, hãy trả lời với format JSON đặc biệt:
    {
      "type": "product_info",
      "message": "Thông tin sản phẩm...",
@@ -305,6 +455,9 @@ Câu hỏi: "iPhone 15 Pro Max giá bao nhiêu?"
 - Nếu có trong danh sách: Trả lời với JSON format như trên
 - Nếu không có: "Xin lỗi, hiện tại cửa hàng chúng tôi không có sản phẩm iPhone 15 Pro Max mà bạn đang tìm kiếm."
 
+Câu hỏi: "iPhone 15 Pro có mấy màu?"
+Trả lời: "iPhone 15 Pro hiện có các màu: Titan Tự Nhiên, Titan Xanh, Titan Trắng, Titan Đen. Sản phẩm có các phiên bản bộ nhớ: 128GB, 256GB, 512GB, 1TB với mức giá từ 28.990.000đ đến 43.990.000đ tùy theo phiên bản bạn chọn."
+
 Câu hỏi: "Hôm nay thời tiết thế nào?"
 Trả lời: "Tôi là trợ lý của cửa hàng điện thoại nên không thể cung cấp thông tin thời tiết. Tôi có thể giúp bạn tìm hiểu về các sản phẩm điện thoại không? 😊"
 
@@ -316,9 +469,14 @@ Hãy áp dụng các quy tắc trên để trả lời câu hỏi một cách ch
 
 async function askQuestion(question, userId = 'guest') {
     try {
-        const dbData = await getAllDatabaseData();
-        const context = buildIntelligentContext(userId, question, dbData);
-        const prompt = createIntelligentPrompt(question, context, dbData);
+        // Tối ưu hóa: Chỉ lấy dữ liệu cần thiết
+        const [relevantProducts, categories] = await Promise.all([
+            getRelevantProducts(question, 5), // Giới hạn tối đa 5 sản phẩm
+            getCategories()
+        ]);
+        
+        const context = await buildIntelligentContext(userId, question, { products: relevantProducts, categories });
+        const prompt = await createIntelligentPrompt(question, context, relevantProducts, categories);
         
         const result = await model.generateContent(prompt);
 const answer = result.response.text();
@@ -333,13 +491,13 @@ try {
     // ✅ Gắn lại ảnh đúng từ DB nếu có
     if (parsedAnswer.products) {
      parsedAnswer.products = parsedAnswer.products.map(product => {
-  const matched = dbData.products.find(p =>
+  const matched = relevantProducts.find(p =>
     p.id === product.id || p.slug === product.slug
   );
 
   return {
     ...product,
-    image: matched?.images?.[0] || DEFAULT_PRODUCT_IMAGE
+    image: matched?.images?.[0] || DEFAULT_IMAGE
   };
 });
     }
