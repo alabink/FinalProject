@@ -66,12 +66,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Chatbot API route (now under /api for consistency with other endpoints)
-app.post('/api/chat', async (req, res) => {
-  const { question } = req.body;
-  const data = await askQuestion(question);
-  return res.status(200).json(data);
-});
+
 
 app.listen(port, () => {
   console.log(`Server listening on port : ${port}`);
