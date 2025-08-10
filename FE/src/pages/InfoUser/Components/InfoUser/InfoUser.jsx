@@ -37,7 +37,11 @@ function InfoUser({ isOpen, setIsOpen, activeTab }) {
         
         // Set avatar preview
         if (dataUser.avatar) {
-            setAvatarPreview(dataUser.avatar); // Using Cloudinary URL directly
+            // Extract Cloudinary URL if it's embedded in another URL
+            const cloudinaryUrl = dataUser.avatar.includes('https://res.cloudinary.com/') 
+                ? dataUser.avatar.substring(dataUser.avatar.indexOf('https://res.cloudinary.com/'))
+                : dataUser.avatar;
+            setAvatarPreview(cloudinaryUrl);
         } else {
             setAvatarPreview(DEFAULT_AVATAR_URL);
         }
