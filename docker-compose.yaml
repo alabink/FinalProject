@@ -1,6 +1,6 @@
 services:
     backend:
-        build: ./backend
+        build: ./BE
         container_name: backend
         restart: always
         command: sh -c "npm install && npm run dev"
@@ -12,7 +12,7 @@ services:
             - '443:443'
         volumes:
             - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-            - ./client/dist:/usr/share/nginx/html
+            - ./FE/dist:/usr/share/nginx/html
             - ./nginx/ssl:/etc/nginx/ssl
         depends_on:
             - backend
