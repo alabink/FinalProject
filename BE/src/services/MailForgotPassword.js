@@ -12,7 +12,7 @@ const resend  = new Resend(process.env.RESEND_API_KEY);
 // const CLIENT_SECRET = process.env.CLIENT_SECRET || '';
 // const REDIRECT_URI = process.env.REDIRECT_URI || 'https://developers.google.com/oauthplayground';
 // const REFRESH_TOKEN = process.env.REFRESH_TOKEN || '';
-// const USER_EMAIL = process.env.USER_EMAIL || 'noreply@techify.com';
+const USER_EMAIL = process.env.USER_EMAIL || 'noreply@techify.com';
 
 // Create OAuth2 client with error handling
 // let oAuth2Client;
