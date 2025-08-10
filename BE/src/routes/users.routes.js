@@ -1,22 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const multer = require('multer');
-const path = require('path');
-
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'src/uploads/avatars');
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + path.extname(file.originalname));
-    },
-});
-
-var upload = multer({
-    storage: storage,
-    limits: { fileSize: 500 * 1024 * 1024 },
-});
+const uploadCloud = require('../config/cloudinary.config');
 
 const { asyncHandler, authUser, authAdmin } = require('../auth/checkAuth');
 
@@ -164,7 +149,7 @@ router.post('/api/reset-password', asyncHandler(controllerUsers.verifyOtp));
  *       200:
  *         description: User information updated successfully
  */
-router.post('/api/update-info-user', authUser, upload.single('avatar'), asyncHandler(controllerUsers.updateInfoUser));
+router.post('/api/update-info-user', authUser, uploadCloud.single('avatar'), asyncHandler(controllerUsers.updateInfoUser));
 
 /**
  * @swagger

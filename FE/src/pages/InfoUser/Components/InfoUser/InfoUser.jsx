@@ -37,7 +37,7 @@ function InfoUser({ isOpen, setIsOpen, activeTab }) {
         
         // Set avatar preview
         if (dataUser.avatar) {
-            setAvatarPreview(`${import.meta.env.VITE_API_URL_IMG}/uploads/avatars/${dataUser.avatar}`);
+            setAvatarPreview(dataUser.avatar); // Using Cloudinary URL directly
         } else {
             setAvatarPreview(DEFAULT_AVATAR_URL);
         }

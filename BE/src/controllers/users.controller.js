@@ -610,7 +610,7 @@ class controllerUsers {
 
             // Add avatar if uploaded
             if (req.file) {
-                updateData.avatar = req.file.filename;
+                updateData.avatar = req.file.path; // Cloudinary returns the full URL in path
             }
 
             // Update user info
