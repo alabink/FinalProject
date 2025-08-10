@@ -481,6 +481,19 @@ class controllerUsers {
             throw new BadRequestError('Không thể lấy thống kê admin');
         }
     }
+
+    async getAllUser(req, res) {
+        try {
+            const users = await modelUser.find().select('-password');
+            new OK({
+                message: 'Lấy danh sách người dùng thành công',
+                metadata: { users }
+            }).send(res);
+        } catch (error) {
+            console.error('Error in getAllUser:', error);
+            throw new BadRequestError('Không thể lấy danh sách người dùng');
+        }
+    }
 }
 
 module.exports = new controllerUsers();
