@@ -480,7 +480,7 @@ function Header() {
                                         >
                                             <Avatar 
                                                 size={40}
-                                                src={dataUser.avatar ? `${import.meta.env.VITE_API_URL_IMG}/uploads/avatars/${dataUser.avatar}` : DEFAULT_AVATAR_URL}
+                                                src={dataUser.avatar || DEFAULT_AVATAR_URL}
                                                 className={cx('user-avatar')}
                                             />
                                             <span className={cx('username')}>
@@ -511,7 +511,7 @@ function Header() {
                                                     <div className={cx('dropdown-header')}>
                                                         <Avatar 
                                                             size={48}
-                                                            src={dataUser.avatar ? `${import.meta.env.VITE_API_URL_IMG}/uploads/avatars/${dataUser.avatar}` : DEFAULT_AVATAR_URL}
+                                                            src={dataUser.avatar || DEFAULT_AVATAR_URL}
                                                             className={cx('dropdown-avatar')}
                                                         />
                                                         <div className={cx('user-details')}>
