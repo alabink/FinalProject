@@ -138,12 +138,36 @@ const MainLayout = () => {
     const [isChecking, setIsChecking] = useState(true);
     const [isAllowed, setIsAllowed] = useState(false);
 
-    // Immediate client-side checks for faster redirect
+    // ULTRA-STRICT client-side checks for immediate redirect
     const isLogged = cookies.get('logged');
+    
+    // If not logged in, redirect immediately
     if (!isLogged) {
         return <Navigate to="/" replace />;
     }
+    
+    // If user data is loaded and not admin, redirect immediately
     if (dataUser && Object.keys(dataUser).length > 0 && dataUser.isAdmin !== true) {
+        return <Navigate to="/" replace />;
+    }
+    
+    // If user data is loaded but isAdmin is undefined/null/false, redirect (safer check)
+    if (dataUser && Object.keys(dataUser).length > 0 && !dataUser.isAdmin) {
+        return <Navigate to="/" replace />;
+    }
+    
+    // If user data is loaded and isAdmin is explicitly false, redirect
+    if (dataUser && dataUser.isAdmin === false) {
+        return <Navigate to="/" replace />;
+    }
+    
+    // EXTRA SAFETY: If user data exists but isAdmin is not explicitly true, redirect
+    if (dataUser && Object.keys(dataUser).length > 0 && dataUser.isAdmin !== true) {
+        return <Navigate to="/" replace />;
+    }
+    
+    // ULTIMATE CHECK: If anything is suspicious, redirect
+    if (dataUser && (typeof dataUser.isAdmin !== 'boolean' || dataUser.isAdmin !== true)) {
         return <Navigate to="/" replace />;
     }
 
@@ -170,6 +194,21 @@ const MainLayout = () => {
     
     // If backend check failed, redirect
     if (!isAllowed) {
+        return <Navigate to="/" replace />;
+    }
+    
+    // FINAL ULTRA-SAFETY CHECK: ensure user is admin before rendering
+    if (!dataUser || !dataUser.isAdmin || dataUser.isAdmin !== true) {
+        return <Navigate to="/" replace />;
+    }
+    
+    // LAST RESORT: If anything looks suspicious, redirect
+    if (typeof dataUser.isAdmin !== 'boolean' || dataUser.isAdmin !== true) {
+        return <Navigate to="/" replace />;
+    }
+    
+    // ABSOLUTE FINAL CHECK: Only render if user is definitely admin
+    if (dataUser.isAdmin !== true) {
         return <Navigate to="/" replace />;
     }
 
