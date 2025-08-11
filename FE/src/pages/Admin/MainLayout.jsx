@@ -146,9 +146,20 @@ const MainLayout = () => {
         return <Navigate to="/" replace />;
     }
     
-    // If user data is loaded and not admin, redirect immediately
-    if (dataUser && Object.keys(dataUser).length > 0 && dataUser.isAdmin !== true) {
-        return <Navigate to="/" replace />;
+    // CRITICAL: If user data exists but isAdmin is not explicitly true, redirect immediately
+    if (dataUser && Object.keys(dataUser).length > 0) {
+        // Check if isAdmin is explicitly true, if not, redirect
+        if (dataUser.isAdmin !== true) {
+            return <Navigate to="/" replace />;
+        }
+        // Additional safety: check if isAdmin is false or undefined
+        if (dataUser.isAdmin === false || dataUser.isAdmin === undefined || dataUser.isAdmin === null) {
+            return <Navigate to="/" replace />;
+        }
+        // Final check: ensure isAdmin is boolean true
+        if (typeof dataUser.isAdmin !== 'boolean' || dataUser.isAdmin !== true) {
+            return <Navigate to="/" replace />;
+        }
     }
     
     // If user data is loaded but isAdmin is undefined/null/false, redirect (safer check)
@@ -209,6 +220,16 @@ const MainLayout = () => {
     
     // ABSOLUTE FINAL CHECK: Only render if user is definitely admin
     if (dataUser.isAdmin !== true) {
+        return <Navigate to="/" replace />;
+    }
+    
+    // ULTIMATE FINAL CHECK: Double-check everything before rendering
+    if (!dataUser || Object.keys(dataUser).length === 0 || dataUser.isAdmin !== true) {
+        return <Navigate to="/" replace />;
+    }
+    
+    // FINAL VERIFICATION: Ensure user is definitely admin
+    if (dataUser.isAdmin !== true || typeof dataUser.isAdmin !== 'boolean') {
         return <Navigate to="/" replace />;
     }
 
