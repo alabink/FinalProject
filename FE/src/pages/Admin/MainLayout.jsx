@@ -138,7 +138,7 @@ const MainLayout = () => {
     const [isChecking, setIsChecking] = useState(true);
     const [isAllowed, setIsAllowed] = useState(false);
 
-    // SIMPLE and FAST client-side checks for immediate redirect
+    // ULTRA SIMPLE and INSTANT redirect logic
     const isLogged = cookies.get('logged');
     
     // Debug logging
@@ -152,25 +152,23 @@ const MainLayout = () => {
         return <Navigate to="/" replace />;
     }
     
-    // If user data is loaded and user is NOT admin, redirect immediately
+    // INSTANT CHECK: If user data exists and is NOT admin, redirect immediately
     if (dataUser && Object.keys(dataUser).length > 0) {
+        // Check if user is admin - if not, redirect instantly
         if (dataUser.isAdmin !== true) {
-            console.log('❌ User is not admin, redirecting to home immediately');
+            console.log('❌ INSTANT REDIRECT: User is not admin, going home now!');
             return <Navigate to="/" replace />;
         }
     }
     
-    // If user data is loaded and user IS admin, allow access
-    if (dataUser && Object.keys(dataUser).length > 0 && dataUser.isAdmin === true) {
-        console.log('✅ Admin user detected, proceeding to backend check');
-        // Continue to backend check
-    }
-    
-    // EXTRA FAST CHECK: If user data exists but isAdmin is false/undefined/null, redirect immediately
-    if (dataUser && Object.keys(dataUser).length > 0 && (dataUser.isAdmin === false || dataUser.isAdmin === undefined || dataUser.isAdmin === null)) {
-        console.log('❌ Extra fast check: User is not admin, redirecting to home immediately');
+    // EXTRA INSTANT CHECK: If user data exists but isAdmin is false, redirect immediately
+    if (dataUser && dataUser.isAdmin === false) {
+        console.log('❌ EXTRA INSTANT REDIRECT: User isAdmin is false, going home now!');
         return <Navigate to="/" replace />;
     }
+    
+    // If we reach here, user might be admin or data not loaded yet
+    // Continue to backend check for final verification
 
     useEffect(() => {
         const checkAccess = async () => {
@@ -198,9 +196,9 @@ const MainLayout = () => {
         return <Navigate to="/" replace />;
     }
     
-    // FINAL CHECK: Simple and fast redirect for non-admin users
+    // FINAL INSTANT CHECK: Redirect non-admin users immediately
     if (dataUser && Object.keys(dataUser).length > 0 && dataUser.isAdmin !== true) {
-        console.log('❌ Final check: User is not admin, redirecting to home');
+        console.log('❌ FINAL INSTANT REDIRECT: User is not admin, going home now!');
         return <Navigate to="/" replace />;
     }
     
@@ -210,7 +208,7 @@ const MainLayout = () => {
     }
     
     // If we reach here, user is confirmed admin, allow access
-    console.log('✅ Final check passed: User is admin, rendering admin page');
+    console.log('✅ FINAL CHECK PASSED: User is admin, rendering admin page');
 
     // Custom menu item renderer to add badges and active indicators
     const getMenuItem = (item) => {
