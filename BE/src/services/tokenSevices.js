@@ -25,7 +25,7 @@ const createToken = async (payload) => {
 
     return jwt.sign(payload, findApiKey.privateKey, {
         algorithm: 'RS256', // Quan trọng: Phải chỉ định thuật toán khi dùng RSA
-        expiresIn: '15m',
+        expiresIn: '30d', // Thay đổi từ 15m thành 30 ngày
     });
 };
 

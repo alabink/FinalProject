@@ -20,17 +20,19 @@ const cx = classNames.bind(styles);
 
 function LoginUser() {
     const navigate = useNavigate();
-    const { showSuccessProgress } = useStore();
+    const { showSuccessProgress, fetchAuth, fetchCart } = useStore();
 
     const handleSuccess = async (response) => {
         const { credential } = response; // Nhận ID Token từ Google
         try {
             const res = await requestLoginGoogle(credential);
             showSuccessProgress(SUCCESS_TYPES.LOGIN, res.message);
+            // Tự động cập nhật state user và cart mà không cần reload trang
+            await fetchAuth();
+            await fetchCart();
             setTimeout(() => {
-                window.location.reload();
-            }, 3000);
-            navigate('/');
+                navigate('/');
+            }, 1500);
         } catch (error) {
             message.error(error.response.data.message);
         }
@@ -52,10 +54,12 @@ function LoginUser() {
         try {
             const res = await requestLogin(data);
             showSuccessProgress(SUCCESS_TYPES.LOGIN, res.metadata.message || 'Đăng nhập thành công!');
+            // Tự động cập nhật state user và cart mà không cần reload trang
+            await fetchAuth();
+            await fetchCart();
             setTimeout(() => {
-                window.location.reload();
-            }, 3000);
-            navigate('/');
+                navigate('/');
+            }, 1500);
         } catch (error) {
             const errorMessage = error.response?.data?.message || 'Đăng nhập thất bại!';
             showSuccessProgress(SUCCESS_TYPES.LOGIN_FAILED, errorMessage);

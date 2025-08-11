@@ -51,21 +51,21 @@ class controllerUsers {
                 httpOnly: true,
                 secure: isSecure,
                 sameSite: 'Lax',
-                maxAge: 15 * 60 * 1000, // 15 phút
+                maxAge: 30 * 24 * 60 * 60 * 1000, // 30 ngày
             });
 
             res.cookie('logged', 1, {
                 httpOnly: false,
                 secure: isSecure,
                 sameSite: 'Lax',
-                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+                maxAge: 30 * 24 * 60 * 60 * 1000, // 30 ngày
             });
 
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
                 secure: isSecure,
                 sameSite: 'Lax',
-                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+                maxAge: 30 * 24 * 60 * 60 * 1000, // 30 ngày
             });
 
             // Encrypt user data
@@ -105,21 +105,21 @@ class controllerUsers {
             httpOnly: true,
             secure: isSecure,
             sameSite: 'Lax',
-            maxAge: 15 * 60 * 1000, // 15 phút
+            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 ngày
         });
 
         res.cookie('logged', 1, {
             httpOnly: false,
             secure: isSecure,
             sameSite: 'Lax',
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 ngày
         });
 
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: isSecure,
             sameSite: 'Lax',
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 ngày
         });
 
         // Encrypt user data
@@ -146,21 +146,21 @@ class controllerUsers {
                 httpOnly: true,
                 secure: isSecure,
                 sameSite: 'Lax',
-                maxAge: 15 * 60 * 1000, // 15 phút
+                maxAge: 30 * 24 * 60 * 60 * 1000, // 30 ngày
             });
 
             res.cookie('logged', 1, {
                 httpOnly: false,
                 secure: isSecure,
                 sameSite: 'Lax',
-                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+                maxAge: 30 * 24 * 60 * 60 * 1000, // 30 ngày
             });
 
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
                 secure: isSecure,
                 sameSite: 'Lax',
-                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+                maxAge: 30 * 24 * 60 * 60 * 1000, // 30 ngày
             });
 
             // Encrypt user data
@@ -188,21 +188,21 @@ class controllerUsers {
                 httpOnly: true,
                 secure: isSecure,
                 sameSite: 'Lax',
-                maxAge: 15 * 60 * 1000, // 15 phút
+                maxAge: 30 * 24 * 60 * 60 * 1000, // 30 ngày
             });
 
             res.cookie('logged', 1, {
                 httpOnly: false,
                 secure: isSecure,
                 sameSite: 'Lax',
-                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+                maxAge: 30 * 24 * 60 * 60 * 1000, // 30 ngày
             });
 
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
                 secure: isSecure,
                 sameSite: 'Lax',
-                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+                maxAge: 30 * 24 * 60 * 60 * 1000, // 30 ngày
             });
 
             // Encrypt user data
@@ -247,14 +247,14 @@ class controllerUsers {
             httpOnly: true,
             secure: isSecure,
             sameSite: 'Lax',
-            maxAge: 15 * 60 * 1000, // 15 phút
+            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 ngày
         });
 
         res.cookie('logged', 1, {
             httpOnly: false,
             secure: isSecure,
             sameSite: 'Lax',
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 ngày
         });
 
         new OK({ message: 'Refresh token thành công', metadata: { token } }).send(res);
