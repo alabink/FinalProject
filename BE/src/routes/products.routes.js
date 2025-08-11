@@ -87,7 +87,7 @@ router.get('/api/product', asyncHandler(controllerProducts.getProductById));
  *       200:
  *         description: Images uploaded successfully
  */
-router.post('/api/upload-image', uploadCloud.array('images'), asyncHandler(controllerProducts.uploadImage));
+router.post('/api/upload-image', authAdmin, uploadCloud.array('images'), asyncHandler(controllerProducts.uploadImage));
 
 /**
  * @swagger
@@ -111,7 +111,7 @@ router.get('/api/all-product', asyncHandler(controllerProducts.getAllProduct));
  *       200:
  *         description: Product edited successfully
  */
-router.post('/api/edit-product', asyncHandler(controllerProducts.editProduct));
+router.post('/api/edit-product', authAdmin, asyncHandler(controllerProducts.editProduct));
 
 /**
  * @swagger
@@ -129,7 +129,7 @@ router.post('/api/edit-product', asyncHandler(controllerProducts.editProduct));
  *       200:
  *         description: Product deleted successfully
  */
-router.delete('/api/delete-product', asyncHandler(controllerProducts.deleteProduct));
+router.delete('/api/delete-product', authAdmin, asyncHandler(controllerProducts.deleteProduct));
 
 /**
  * @swagger

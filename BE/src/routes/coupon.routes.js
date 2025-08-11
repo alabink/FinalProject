@@ -22,7 +22,7 @@ const { asyncHandler, authUser, authAdmin } = require('../auth/checkAuth');
  *       200:
  *         description: Coupon created successfully
  */
-router.post('/api/create-coupon', asyncHandler(controllerCoupon.createCoupon));
+router.post('/api/create-coupon', authAdmin, asyncHandler(controllerCoupon.createCoupon));
 
 /**
  * @swagger
@@ -58,7 +58,7 @@ router.get('/api/coupons', asyncHandler(controllerCoupon.getAllCoupon));
  *       200:
  *         description: Coupon deleted successfully
  */
-router.delete('/api/delete-coupon', asyncHandler(controllerCoupon.deleteCoupon));
+router.delete('/api/delete-coupon', authAdmin, asyncHandler(controllerCoupon.deleteCoupon));
 
 /**
  * @swagger
@@ -70,6 +70,6 @@ router.delete('/api/delete-coupon', asyncHandler(controllerCoupon.deleteCoupon))
  *       200:
  *         description: Coupon updated successfully
  */
-router.post('/api/update-coupon', asyncHandler(controllerCoupon.updateCoupon));
+router.post('/api/update-coupon', authAdmin, asyncHandler(controllerCoupon.updateCoupon));
 
 module.exports = router;

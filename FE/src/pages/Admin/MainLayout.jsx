@@ -25,7 +25,8 @@ import OrderManagement from './Components/OrderManagement';
 import EditProduct from './Pages/EditProduct';
 import CategoryManagement from './Components/CategoryManagement';
 import { requestAdmin } from '../../Config/request';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
+import cookies from 'js-cookie';
 import CouponManagement from './Components/CouponManagement/CouponManagement';
 import styles from './MainLayout.module.scss';
 import classNames from 'classnames/bind';
@@ -133,17 +134,35 @@ const MainLayout = () => {
     const navigate = useNavigate();
     const { dataUser } = useStore();
 
+    // Guard: verify admin before rendering
+    const [isChecking, setIsChecking] = useState(true);
+    const [isAllowed, setIsAllowed] = useState(false);
+
     useEffect(() => {
-        const fetchAdmin = async () => {
+        const checkAccess = async () => {
+            // If not logged in, redirect to login
+            const isLogged = cookies.get('logged');
+            if (!isLogged) {
+                setIsChecking(false);
+                setIsAllowed(false);
+                return;
+            }
+
             try {
                 await requestAdmin();
+                setIsAllowed(true);
             } catch (error) {
-                navigate('/');
+                setIsAllowed(false);
+            } finally {
+                setIsChecking(false);
             }
         };
 
-        fetchAdmin();
-    }, [navigate]);
+        checkAccess();
+    }, []);
+
+    if (isChecking) return null;
+    if (!isAllowed) return <Navigate to="/" replace />;
 
     // Custom menu item renderer to add badges and active indicators
     const getMenuItem = (item) => {

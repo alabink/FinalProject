@@ -12,7 +12,7 @@ const { askQuestion } = require('../utils/Chatbot');
 // Thêm các import cần thiết cho tính năng upload ảnh
 const uploadCloud = require('../config/cloudinary.config');
 const controllerProducts = require('../controllers/products.controller');
-const { asyncHandler } = require('../auth/checkAuth');
+const { asyncHandler, authAdmin } = require('../auth/checkAuth');
 
 function routes(app) {
     app.post('/api/register', userRoutes);
@@ -41,7 +41,8 @@ function routes(app) {
 
     app.post('/api/add-product', productRoutes);
     // Sử dụng middleware uploadCloud để xử lý multipart/form-data trước khi vào controller
-    app.post('/api/upload-image', uploadCloud.array('images'), asyncHandler(controllerProducts.uploadImage));
+    // Ensure upload-image is admin-only
+    app.post('/api/upload-image', authAdmin, uploadCloud.array('images'), asyncHandler(controllerProducts.uploadImage));
     app.get('/api/products', productRoutes);
     app.get('/api/product', productRoutes);
     app.get('/api/all-product', productRoutes);

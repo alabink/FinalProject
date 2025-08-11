@@ -22,7 +22,7 @@ const controllerCategory = require('../controllers/category.controller');
  *       200:
  *         description: Category created successfully
  */
-router.post('/api/create-category', asyncHandler(controllerCategory.createCategory));
+router.post('/api/create-category', authAdmin, asyncHandler(controllerCategory.createCategory));
 
 /**
  * @swagger
@@ -46,7 +46,7 @@ router.get('/api/get-all-category', asyncHandler(controllerCategory.getAllCatego
  *       200:
  *         description: Category deleted successfully
  */
-router.delete('/api/delete-category', asyncHandler(controllerCategory.deleteCategory));
+router.delete('/api/delete-category', authAdmin, asyncHandler(controllerCategory.deleteCategory));
 
 /**
  * @swagger
@@ -58,7 +58,7 @@ router.delete('/api/delete-category', asyncHandler(controllerCategory.deleteCate
  *       200:
  *         description: Category updated successfully
  */
-router.post('/api/update-category', asyncHandler(controllerCategory.updateCategory));
+router.post('/api/update-category', authAdmin, asyncHandler(controllerCategory.updateCategory));
 
 /**
  * @swagger
