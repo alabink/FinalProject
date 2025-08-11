@@ -149,7 +149,8 @@ const MainLayout = () => {
     // If not logged in, redirect immediately
     if (!isLogged) {
         console.log('❌ Not logged in, redirecting to home');
-        return <Navigate to="/" replace />;
+        window.location.href = '/';
+        return null;
     }
     
     // INSTANT CHECK: If user data exists and is NOT admin, redirect immediately
@@ -157,14 +158,16 @@ const MainLayout = () => {
         // Check if user is admin - if not, redirect instantly
         if (dataUser.isAdmin !== true) {
             console.log('❌ INSTANT REDIRECT: User is not admin, going home now!');
-            return <Navigate to="/" replace />;
+            window.location.href = '/';
+            return null;
         }
     }
     
     // EXTRA INSTANT CHECK: If user data exists but isAdmin is false, redirect immediately
     if (dataUser && dataUser.isAdmin === false) {
         console.log('❌ EXTRA INSTANT REDIRECT: User isAdmin is false, going home now!');
-        return <Navigate to="/" replace />;
+        window.location.href = '/';
+        return null;
     }
     
     // If we reach here, user might be admin or data not loaded yet
@@ -193,13 +196,15 @@ const MainLayout = () => {
     
     // If backend check failed, redirect
     if (!isAllowed) {
-        return <Navigate to="/" replace />;
+        window.location.href = '/';
+        return null;
     }
     
     // FINAL INSTANT CHECK: Redirect non-admin users immediately
     if (dataUser && Object.keys(dataUser).length > 0 && dataUser.isAdmin !== true) {
         console.log('❌ FINAL INSTANT REDIRECT: User is not admin, going home now!');
-        return <Navigate to="/" replace />;
+        window.location.href = '/';
+        return null;
     }
     
     // If user data is not loaded yet, show loading
