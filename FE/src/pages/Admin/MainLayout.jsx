@@ -138,7 +138,7 @@ const MainLayout = () => {
     const [isChecking, setIsChecking] = useState(true);
     const [isAllowed, setIsAllowed] = useState(false);
 
-    // SMART client-side checks for immediate redirect
+    // SIMPLE and FAST client-side checks for immediate redirect
     const isLogged = cookies.get('logged');
     
     // Debug logging
@@ -152,22 +152,24 @@ const MainLayout = () => {
         return <Navigate to="/" replace />;
     }
     
-    // If user data is loaded and isAdmin is explicitly false, redirect immediately
-    if (dataUser && Object.keys(dataUser).length > 0 && dataUser.isAdmin === false) {
-        console.log('❌ User is not admin, redirecting to home');
-        return <Navigate to="/" replace />;
+    // If user data is loaded and user is NOT admin, redirect immediately
+    if (dataUser && Object.keys(dataUser).length > 0) {
+        if (dataUser.isAdmin !== true) {
+            console.log('❌ User is not admin, redirecting to home immediately');
+            return <Navigate to="/" replace />;
+        }
     }
     
-    // If user data is loaded but isAdmin is undefined/null, wait for data to load
-    if (dataUser && Object.keys(dataUser).length > 0 && (dataUser.isAdmin === undefined || dataUser.isAdmin === null)) {
-        console.log('⏳ Waiting for admin status to load...');
-        return <div>Loading...</div>;
-    }
-    
-    // If user data is loaded and isAdmin is true, allow access
+    // If user data is loaded and user IS admin, allow access
     if (dataUser && Object.keys(dataUser).length > 0 && dataUser.isAdmin === true) {
         console.log('✅ Admin user detected, proceeding to backend check');
         // Continue to backend check
+    }
+    
+    // EXTRA FAST CHECK: If user data exists but isAdmin is false/undefined/null, redirect immediately
+    if (dataUser && Object.keys(dataUser).length > 0 && (dataUser.isAdmin === false || dataUser.isAdmin === undefined || dataUser.isAdmin === null)) {
+        console.log('❌ Extra fast check: User is not admin, redirecting to home immediately');
+        return <Navigate to="/" replace />;
     }
 
     useEffect(() => {
@@ -196,8 +198,9 @@ const MainLayout = () => {
         return <Navigate to="/" replace />;
     }
     
-    // FINAL CHECK: Only redirect if user is explicitly not admin
-    if (dataUser && Object.keys(dataUser).length > 0 && dataUser.isAdmin === false) {
+    // FINAL CHECK: Simple and fast redirect for non-admin users
+    if (dataUser && Object.keys(dataUser).length > 0 && dataUser.isAdmin !== true) {
+        console.log('❌ Final check: User is not admin, redirecting to home');
         return <Navigate to="/" replace />;
     }
     
@@ -206,11 +209,8 @@ const MainLayout = () => {
         return <div>Loading...</div>;
     }
     
-    // If we reach here and user is admin, allow access
-    if (dataUser && dataUser.isAdmin === true) {
-        // User is confirmed admin, render the admin page
-        // This will happen after backend verification passes
-    }
+    // If we reach here, user is confirmed admin, allow access
+    console.log('✅ Final check passed: User is admin, rendering admin page');
 
     // Custom menu item renderer to add badges and active indicators
     const getMenuItem = (item) => {
