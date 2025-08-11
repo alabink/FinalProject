@@ -138,82 +138,37 @@ const MainLayout = () => {
     const [isChecking, setIsChecking] = useState(true);
     const [isAllowed, setIsAllowed] = useState(false);
 
-    // ULTRA SIMPLE and INSTANT redirect logic
-    const isLogged = cookies.get('logged');
-    
-    // Debug logging
-    console.log('🔍 Debug - isLogged:', isLogged);
-    console.log('🔍 Debug - dataUser:', dataUser);
-    console.log('🔍 Debug - dataUser.isAdmin:', dataUser?.isAdmin);
-    
-    // If not logged in, redirect immediately
-    if (!isLogged) {
-        console.log('❌ Not logged in, redirecting to home');
-        window.location.href = '/';
-        return null;
-    }
-    
-    // INSTANT CHECK: If user data exists and is NOT admin, redirect immediately
-    if (dataUser && Object.keys(dataUser).length > 0) {
-        // Check if user is admin - if not, redirect instantly
-        if (dataUser.isAdmin !== true) {
-            console.log('❌ INSTANT REDIRECT: User is not admin, going home now!');
-            window.location.href = '/';
-            return null;
+    // Redirect non-admins and unauthenticated users using effects (hooks must not be conditional)
+    useEffect(() => {
+        const logged = cookies.get('logged');
+        if (!logged) {
+            navigate('/', { replace: true });
+            return;
         }
-    }
-    
-    // EXTRA INSTANT CHECK: If user data exists but isAdmin is false, redirect immediately
-    if (dataUser && dataUser.isAdmin === false) {
-        console.log('❌ EXTRA INSTANT REDIRECT: User isAdmin is false, going home now!');
-        window.location.href = '/';
-        return null;
-    }
-    
-    // If we reach here, user might be admin or data not loaded yet
-    // Continue to backend check for final verification
+        if (dataUser && Object.keys(dataUser).length > 0 && dataUser.isAdmin !== true) {
+            navigate('/', { replace: true });
+        }
+    }, [dataUser, navigate]);
 
     useEffect(() => {
-        const checkAccess = async () => {
-            // Backend verification as fallback
+        const verify = async () => {
             try {
                 await requestAdmin();
                 setIsAllowed(true);
             } catch (error) {
                 setIsAllowed(false);
+                navigate('/', { replace: true });
             } finally {
                 setIsChecking(false);
             }
         };
+        verify();
+    }, [navigate]);
 
-        checkAccess();
-    }, []);
-
-    // Show loading while checking backend
-    if (isChecking) {
-        return <div>Loading...</div>;
-    }
-    
-    // If backend check failed, redirect
-    if (!isAllowed) {
-        window.location.href = '/';
+    // While verifying or redirecting, render nothing
+    if (isChecking || !isAllowed) {
         return null;
     }
-    
-    // FINAL INSTANT CHECK: Redirect non-admin users immediately
-    if (dataUser && Object.keys(dataUser).length > 0 && dataUser.isAdmin !== true) {
-        console.log('❌ FINAL INSTANT REDIRECT: User is not admin, going home now!');
-        window.location.href = '/';
-        return null;
-    }
-    
-    // If user data is not loaded yet, show loading
-    if (!dataUser || Object.keys(dataUser).length === 0) {
-        return <div>Loading...</div>;
-    }
-    
-    // If we reach here, user is confirmed admin, allow access
-    console.log('✅ FINAL CHECK PASSED: User is admin, rendering admin page');
 
     // Custom menu item renderer to add badges and active indicators
     const getMenuItem = (item) => {
