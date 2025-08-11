@@ -141,20 +141,33 @@ const MainLayout = () => {
     // SMART client-side checks for immediate redirect
     const isLogged = cookies.get('logged');
     
+    // Debug logging
+    console.log('🔍 Debug - isLogged:', isLogged);
+    console.log('🔍 Debug - dataUser:', dataUser);
+    console.log('🔍 Debug - dataUser.isAdmin:', dataUser?.isAdmin);
+    
     // If not logged in, redirect immediately
     if (!isLogged) {
+        console.log('❌ Not logged in, redirecting to home');
         return <Navigate to="/" replace />;
     }
     
     // If user data is loaded and isAdmin is explicitly false, redirect immediately
     if (dataUser && Object.keys(dataUser).length > 0 && dataUser.isAdmin === false) {
+        console.log('❌ User is not admin, redirecting to home');
         return <Navigate to="/" replace />;
     }
     
     // If user data is loaded but isAdmin is undefined/null, wait for data to load
     if (dataUser && Object.keys(dataUser).length > 0 && (dataUser.isAdmin === undefined || dataUser.isAdmin === null)) {
-        // Wait for data to fully load before making decision
+        console.log('⏳ Waiting for admin status to load...');
         return <div>Loading...</div>;
+    }
+    
+    // If user data is loaded and isAdmin is true, allow access
+    if (dataUser && Object.keys(dataUser).length > 0 && dataUser.isAdmin === true) {
+        console.log('✅ Admin user detected, proceeding to backend check');
+        // Continue to backend check
     }
 
     useEffect(() => {
@@ -191,6 +204,12 @@ const MainLayout = () => {
     // If user data is not loaded yet, show loading
     if (!dataUser || Object.keys(dataUser).length === 0) {
         return <div>Loading...</div>;
+    }
+    
+    // If we reach here and user is admin, allow access
+    if (dataUser && dataUser.isAdmin === true) {
+        // User is confirmed admin, render the admin page
+        // This will happen after backend verification passes
     }
 
     // Custom menu item renderer to add badges and active indicators
