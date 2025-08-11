@@ -27,188 +27,349 @@ function getImageUrl(imagePath) {
   if (imagePath.startsWith('http')) return imagePath;
   return `${CLOUDINARY_BASE_URL}/${imagePath}`;
 }
-//
 
-
-// Tối ưu hóa: Truy vấn thông minh chỉ lấy sản phẩm liên quan
-async function getRelevantProducts(query, limit = 5) {
+// ✅ FIXED: Hàm truy vấn sản phẩm được tối ưu hóa hoàn toàn
+async function getRelevantProducts(query, limit = 10) {
     try {
-        // Tách từ khóa và làm sạch
-        const keywords = query.toLowerCase()
-            .split(' ')
-            .filter(word => word.length > 1)
-            .map(word => word.trim());
+        // Bước 1: Phân tích và làm sạch query
+        const cleanQuery = query.toLowerCase()
+            .replace(/[^\w\s\u00C0-\u024F\u1E00-\u1EFF]/g, ' ') // Giữ lại ký tự tiếng Việt
+            .replace(/\s+/g, ' ')
+            .trim();
 
-        if (keywords.length === 0) {
-            // Nếu không có từ khóa cụ thể, trả về sản phẩm phổ biến
+        console.log('🔍 Original query:', query);
+        console.log('🧹 Cleaned query:', cleanQuery);
+
+        if (!cleanQuery || cleanQuery.length < 2) {
+            // Trả về sản phẩm mới nhất nếu query rỗng
             const products = await modelProduct
                 .find({})
                 .populate('category')
                 .sort({ createdAt: -1 })
                 .limit(limit)
-                .lean(); // Thêm .lean() để tăng performance
+                .lean();
+            
+            console.log('📦 Fallback products count:', products.length);
+            return products.map(product => formatProduct(product));
+        }
+
+        // Bước 2: Tách từ khóa thông minh
+        const keywords = extractKeywords(cleanQuery);
+        console.log('🔑 Keywords extracted:', keywords);
+
+        if (keywords.length === 0) {
+            // Fallback với aggregation đơn giản
+            const products = await modelProduct
+                .find({})
+                .populate('category')
+                .sort({ createdAt: -1 })
+                .limit(limit)
+                .lean();
             
             return products.map(product => formatProduct(product));
         }
 
-        // Tạo regex pattern cho tìm kiếm linh hoạt
-        const regexPatterns = keywords.map(keyword => new RegExp(keyword, 'i'));
+        // Bước 3: Xây dựng pipeline aggregation được tối ưu
+        const pipeline = buildSearchPipeline(keywords, limit);
         
-        // Tạo aggregation pipeline tối ưu
-        const pipeline = [
-            {
-                $lookup: {
-                    from: 'categories',
-                    localField: 'category',
-                    foreignField: '_id',
-                    as: 'category'
-                }
-            },
-            {
-                $unwind: {
-                    path: '$category',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $addFields: {
-                    // Tính điểm relevance dựa trên sự xuất hiện của từ khóa
-                    relevanceScore: {
-                        $add: [
-                            // Điểm từ tên sản phẩm (trọng số cao nhất)
-                            {
-                                $multiply: [
-                                    { $size: {
-                                        $filter: {
-                                            input: regexPatterns,
-                                            cond: { $regexMatch: { input: '$name', regex: '$$this' } }
-                                        }
-                                    }},
-                                    10
-                                ]
-                            },
-                            // Điểm từ brand
-                            {
-                                $multiply: [
-                                    { $size: {
-                                        $filter: {
-                                            input: regexPatterns,
-                                            cond: { $regexMatch: { input: '$brand', regex: '$$this' } }
-                                        }
-                                    }},
-                                    8
-                                ]
-                            },
-                            // Điểm từ mô tả
-                            {
-                                $multiply: [
-                                    { $size: {
-                                        $filter: {
-                                            input: regexPatterns,
-                                            cond: { $regexMatch: { input: { $ifNull: ['$description', ''] }, regex: '$$this' } }
-                                        }
-                                    }},
-                                    3
-                                ]
-                            },
-                            // Điểm từ category
-                            {
-                                $multiply: [
-                                    { $size: {
-                                        $filter: {
-                                            input: regexPatterns,
-                                            cond: { $regexMatch: { input: { $ifNull: ['$category.nameCategory', ''] }, regex: '$$this' } }
-                                        }
-                                    }},
-                                    5
-                                ]
-                            }
-                        ]
-                    }
-                }
-            },
-            {
-                $match: {
-                    $or: [
-                        { name: { $in: regexPatterns } },
-                        { brand: { $in: regexPatterns } },
-                        { description: { $in: regexPatterns } },
-                        { 'category.nameCategory': { $in: regexPatterns } },
-                        { relevanceScore: { $gt: 0 } }
-                    ]
-                }
-            },
-            {
-                $sort: { 
-                    relevanceScore: -1, 
-                    createdAt: -1 
-                }
-            },
-            {
-                $limit: limit
-            }
-        ];
+        console.log('⚙️ Search pipeline:', JSON.stringify(pipeline, null, 2));
 
+        // Bước 4: Thực hiện truy vấn
         const products = await modelProduct.aggregate(pipeline);
+        
+        console.log('📊 Found products:', products.length);
+        console.log('📝 Product names:', products.map(p => p.name));
+
+        if (products.length === 0) {
+            console.log('⚠️ No products found, trying fallback search...');
+            return await fallbackSearch(cleanQuery, limit);
+        }
+
         return products.map(product => formatProduct(product));
 
     } catch (error) {
-        console.error('Error in getRelevantProducts:', error);
-        // Fallback: trả về một vài sản phẩm ngẫu nhiên
+        console.error('❌ Error in getRelevantProducts:', error);
+        
+        // Ultimate fallback
         try {
             const fallbackProducts = await modelProduct
                 .find({})
                 .populate('category')
-                .limit(limit);
+                .limit(limit)
+                .lean();
+            
+            console.log('🆘 Ultimate fallback returned:', fallbackProducts.length, 'products');
             return fallbackProducts.map(product => formatProduct(product));
         } catch (fallbackError) {
-            console.error('Fallback query also failed:', fallbackError);
+            console.error('💀 Ultimate fallback failed:', fallbackError);
             return [];
         }
     }
 }
 
-// Helper function để format product data
+// ✅ Hàm tách từ khóa thông minh
+function extractKeywords(query) {
+    const stopWords = new Set([
+        'của', 'cho', 'và', 'có', 'là', 'được', 'trong', 'với', 'về', 
+        'tôi', 'bạn', 'này', 'đó', 'the', 'and', 'or', 'in', 'on', 'at',
+        'giá', 'bao', 'nhiêu', 'thế', 'nào', 'gì', 'sao', 'như'
+    ]);
+
+    return query
+        .split(/\s+/)
+        .map(word => word.trim())
+        .filter(word => word.length > 1 && !stopWords.has(word))
+        .filter(word => !/^\d+$/.test(word) || word.length > 3); // Giữ lại số có ý nghĩa
+}
+
+// ✅ Xây dựng pipeline tìm kiếm tối ưu
+function buildSearchPipeline(keywords, limit) {
+    // Tạo regex patterns cho từng keyword
+    const regexPatterns = keywords.map(keyword => ({
+        $regex: keyword,
+        $options: 'i'
+    }));
+
+    return [
+        // Bước 1: Join với category
+        {
+            $lookup: {
+                from: 'categories',
+                localField: 'category',
+                foreignField: '_id',
+                as: 'category'
+            }
+        },
+        {
+            $unwind: {
+                path: '$category',
+                preserveNullAndEmptyArrays: true
+            }
+        },
+        
+        // Bước 2: Tính điểm relevance
+        {
+            $addFields: {
+                relevanceScore: {
+                    $add: [
+                        // Điểm perfect match cho tên (trọng số 20)
+                        {
+                            $cond: {
+                                if: {
+                                    $or: keywords.map(keyword => ({
+                                        $regexMatch: {
+                                            input: { $toLower: '$name' },
+                                            regex: new RegExp(`\\b${keyword}\\b`, 'i')
+                                        }
+                                    }))
+                                },
+                                then: 20,
+                                else: 0
+                            }
+                        },
+                        
+                        // Điểm partial match cho tên (trọng số 15)
+                        {
+                            $multiply: [
+                                {
+                                    $size: {
+                                        $filter: {
+                                            input: regexPatterns,
+                                            cond: {
+                                                $regexMatch: {
+                                                    input: { $toLower: '$name' },
+                                                    regex: '$$this'
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                15
+                            ]
+                        },
+                        
+                        // Điểm brand match (trọng số 12)
+                        {
+                            $multiply: [
+                                {
+                                    $size: {
+                                        $filter: {
+                                            input: regexPatterns,
+                                            cond: {
+                                                $regexMatch: {
+                                                    input: { $toLower: { $ifNull: ['$brand', ''] } },
+                                                    regex: '$$this'
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                12
+                            ]
+                        },
+                        
+                        // Điểm category match (trọng số 8)
+                        {
+                            $multiply: [
+                                {
+                                    $size: {
+                                        $filter: {
+                                            input: regexPatterns,
+                                            cond: {
+                                                $regexMatch: {
+                                                    input: { $toLower: { $ifNull: ['$category.nameCategory', ''] } },
+                                                    regex: '$$this'
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                8
+                            ]
+                        },
+                        
+                        // Điểm description match (trọng số 5)
+                        {
+                            $multiply: [
+                                {
+                                    $size: {
+                                        $filter: {
+                                            input: regexPatterns,
+                                            cond: {
+                                                $regexMatch: {
+                                                    input: { $toLower: { $ifNull: ['$description', ''] } },
+                                                    regex: '$$this'
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                5
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        
+        // Bước 3: Lọc sản phẩm có điểm > 0
+        {
+            $match: {
+                relevanceScore: { $gt: 0 }
+            }
+        },
+        
+        // Bước 4: Sắp xếp theo điểm relevance và thời gian
+        {
+            $sort: { 
+                relevanceScore: -1, 
+                createdAt: -1 
+            }
+        },
+        
+        // Bước 5: Giới hạn kết quả
+        {
+            $limit: limit
+        }
+    ];
+}
+
+// ✅ Fallback search khi không tìm thấy kết quả
+async function fallbackSearch(query, limit) {
+    try {
+        console.log('🔄 Executing fallback search for:', query);
+        
+        // Thử tìm kiếm với text search index (nếu có)
+        let products = await modelProduct
+            .find({
+                $or: [
+                    { name: { $regex: query, $options: 'i' } },
+                    { brand: { $regex: query, $options: 'i' } },
+                    { description: { $regex: query, $options: 'i' } }
+                ]
+            })
+            .populate('category')
+            .limit(limit)
+            .lean();
+
+        if (products.length === 0) {
+            // Nếu vẫn không có, thử tìm từng từ
+            const words = query.split(' ').filter(word => word.length > 2);
+            for (const word of words) {
+                products = await modelProduct
+                    .find({
+                        $or: [
+                            { name: { $regex: word, $options: 'i' } },
+                            { brand: { $regex: word, $options: 'i' } }
+                        ]
+                    })
+                    .populate('category')
+                    .limit(limit)
+                    .lean();
+                
+                if (products.length > 0) break;
+            }
+        }
+
+        console.log('🔄 Fallback found:', products.length, 'products');
+        return products.map(product => formatProduct(product));
+    } catch (error) {
+        console.error('❌ Fallback search error:', error);
+        return [];
+    }
+}
+
+// ✅ Helper function để format product data - CẢI TIẾN
 function formatProduct(product) {
     return {
         id: product._id.toString(),
-        name: product.name,
-        brand: product.brand,
-        price: product.price,
-        priceDiscount: product.priceDiscount,
-        description: product.description,
-        attributes: product.attributes,
-        variants: product.variants || [], // Đảm bảo variants được bao gồm
-        stock: product.stock,
-        rating: product.rating,
-        category: product.category,
+        name: product.name || '',
+        brand: product.brand || '',
+        price: product.price || 0,
+        priceDiscount: product.priceDiscount || null,
+        description: product.description || '',
+        attributes: product.attributes || {},
+        variants: product.variants || [],
+        stock: product.stock || 0,
+        rating: product.rating || 0,
+        category: product.category ? {
+            id: product.category._id?.toString() || product.category.toString(),
+            name: product.category.nameCategory || product.category.name || '',
+            description: product.category.description || ''
+        } : null,
         images: product.images?.map(img => getImageUrl(img)) || [DEFAULT_IMAGE],
         slug: product.slug || product._id.toString()
     };
 }
 
-// Hàm lấy categories (ít khi thay đổi nên có thể cache)
+// ✅ Hàm lấy categories được tối ưu
 async function getCategories() {
     try {
-        const categories = await modelCategory.find({}).lean(); // .lean() để tăng performance
+        const categories = await modelCategory.find({}).lean();
         return categories.map(cat => ({
             id: cat._id.toString(),
-            name: cat.nameCategory || cat.name,
-            description: cat.description
+            name: cat.nameCategory || cat.name || '',
+            description: cat.description || ''
         }));
     } catch (error) {
-        console.error('Error getting categories:', error);
+        console.error('❌ Error getting categories:', error);
         return [];
     }
 }
 
-// Hàm tìm kiếm sản phẩm thông minh (sử dụng hệ thống mới)
-async function smartProductSearch(query, limit = 5) {
-    // Sử dụng hàm getRelevantProducts đã được tối ưu
-    return await getRelevantProducts(query, limit);
+// ✅ Hàm tìm kiếm thông minh được cải tiến
+async function smartProductSearch(query, limit = 8) {
+    console.log('🎯 Smart product search for:', query, 'limit:', limit);
+    
+    const results = await getRelevantProducts(query, limit);
+    
+    console.log('✅ Smart search results:', results.length);
+    console.log('📋 Product names:', results.map(p => p.name));
+    
+    return results;
 }
 
-// Hàm phân tích câu hỏi và tìm intent
+// Giữ nguyên các hàm còn lại...
 function analyzeQuestion(question) {
     const intents = {
         product_specific: {
@@ -276,7 +437,6 @@ function analyzeQuestion(question) {
     return results.sort((a, b) => b.confidence - a.confidence);
 }
 
-// Hàm tạo context thông minh
 async function buildIntelligentContext(userId, question, dbData) {
     if (!userContext.has(userId)) {
         userContext.set(userId, {
@@ -294,11 +454,13 @@ async function buildIntelligentContext(userId, question, dbData) {
         context.lastIntent = intents[0].intent;
     }
 
-    // Tìm sản phẩm được đề cập trong câu hỏi (tối ưu hóa với limit)
-    const mentionedProducts = await smartProductSearch(question, 3);
-    console.log("mentionedProducts:", mentionedProducts);
+    // ✅ CẢI TIẾN: Tăng số lượng sản phẩm để có nhiều lựa chọn hơn
+    const mentionedProducts = await smartProductSearch(question, 8);
+    console.log("🔍 Mentioned products found:", mentionedProducts.length);
+    console.log("📋 Product names:", mentionedProducts.map(p => p.name));
+    
     if (mentionedProducts.length > 0) {
-        context.currentProducts = mentionedProducts; // Đã được giới hạn trong smartProductSearch
+        context.currentProducts = mentionedProducts;
     }
 
     // Phân tích preferences
@@ -335,33 +497,39 @@ async function buildIntelligentContext(userId, question, dbData) {
     return context;
 }
 
-// Hàm tạo prompt thông minh cho AI (tối ưu hóa)
 async function createIntelligentPrompt(question, context, relevantProducts, categories) {
-    // Chỉ sử dụng sản phẩm liên quan thay vì toàn bộ database
-    const productInfo = relevantProducts.map(product => {
-        // Xử lý thông tin variants (màu sắc và bộ nhớ)
+    // ✅ CẢI TIẾN: Hiển thị thông tin sản phẩm chi tiết hơn
+    const productInfo = relevantProducts.map((product, index) => {
         let variantInfo = '';
         if (product.variants && product.variants.length > 0) {
-            const colors = [...new Set(product.variants.map(v => v.color.name))];
-            const storages = [...new Set(product.variants.map(v => v.storage.size))];
+            const colors = [...new Set(product.variants.map(v => v.color?.name).filter(Boolean))];
+            const storages = [...new Set(product.variants.map(v => v.storage?.size).filter(Boolean))];
             const priceRange = {
                 min: Math.min(...product.variants.map(v => v.priceDiscount || v.price)),
                 max: Math.max(...product.variants.map(v => v.price))
             };
             
             variantInfo = `
-Màu sắc có sẵn: ${colors.join(', ')}
-Phiên bản bộ nhớ: ${storages.join(', ')}
+Màu sắc có sẵn: ${colors.length > 0 ? colors.join(', ') : 'Không có thông tin'}
+Phiên bản bộ nhớ: ${storages.length > 0 ? storages.join(', ') : 'Không có thông tin'}
 Khoảng giá: ${priceRange.min.toLocaleString('vi-VN')}đ - ${priceRange.max.toLocaleString('vi-VN')}đ`;
         }
 
+        const attributesText = Object.entries(product.attributes || {})
+            .map(([k, v]) => `${k}: ${v}`)
+            .join(', ');
+
         return `
+[SẢN PHẨM ${index + 1}]
 ID: ${product.id}
 Tên: ${product.name}
 Brand: ${product.brand}
 Giá: ${product.price?.toLocaleString('vi-VN') || 'N/A'}đ${product.priceDiscount ? ` (Giảm giá: ${product.priceDiscount.toLocaleString('vi-VN')}đ)` : ''}
 Mô tả: ${product.description || 'Không có mô tả'}
-Thông số: ${Object.entries(product.attributes || {}).map(([k, v]) => `${k}: ${v}`).join(', ')}${variantInfo}
+Thông số kỹ thuật: ${attributesText || 'Không có thông số'}${variantInfo}
+Số lượng tồn kho: ${product.stock || 0}
+Đánh giá: ${product.rating || 0}/5
+Danh mục: ${product.category?.name || 'Không xác định'}
 Ảnh: ${product.images?.[0] || DEFAULT_IMAGE}
 Slug: ${product.slug}
 `;
@@ -383,7 +551,7 @@ Lịch sử hội thoại: ${context.conversationFlow.slice(-3).map(f => f.quest
 Bạn là một AI trợ lý thông minh của cửa hàng điện thoại. Nhiệm vụ của bạn là trả lời mọi câu hỏi của khách hàng một cách chính xác và phù hợp.
 
 THÔNG TIN CỬA HÀNG:
-DANH SÁCH SẢN PHẨM:
+DANH SÁCH SẢN PHẨM (${relevantProducts.length} sản phẩm được tìm thấy):
 ${productInfo}
 
 DANH MỤC SẢN PHẨM:
@@ -465,64 +633,159 @@ Hãy áp dụng các quy tắc trên để trả lời câu hỏi một cách ch
 `;
 }
 
-// Hàm xử lý câu hỏi chính
-
+// ✅ Hàm xử lý câu hỏi chính - CẢI TIẾN
 async function askQuestion(question, userId = 'guest') {
     try {
-        // Tối ưu hóa: Chỉ lấy dữ liệu cần thiết
+        console.log('🎤 Processing question:', question, 'for user:', userId);
+        
+        // Tối ưu hóa: Tăng số lượng sản phẩm để có kết quả tốt hơn
         const [relevantProducts, categories] = await Promise.all([
-            getRelevantProducts(question, 5), // Giới hạn tối đa 5 sản phẩm
+            getRelevantProducts(question, 10), // Tăng từ 5 lên 10
             getCategories()
         ]);
+        
+        console.log('📦 Retrieved products:', relevantProducts.length);
+        console.log('🏷️ Retrieved categories:', categories.length);
         
         const context = await buildIntelligentContext(userId, question, { products: relevantProducts, categories });
         const prompt = await createIntelligentPrompt(question, context, relevantProducts, categories);
         
         const result = await model.generateContent(prompt);
-const answer = result.response.text();
+        const answer = result.response.text();
 
-// Parse JSON response if exists
-let parsedAnswer;
-try {
-  const jsonMatch = answer.match(/\{[\s\S]*\}/);
-  if (jsonMatch) {
-    parsedAnswer = JSON.parse(jsonMatch[0]);
+        // Parse JSON response if exists
+        let parsedAnswer;
+        try {
+            const jsonMatch = answer.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                parsedAnswer = JSON.parse(jsonMatch[0]);
 
-    // ✅ Gắn lại ảnh đúng từ DB nếu có
-    if (parsedAnswer.products) {
-     parsedAnswer.products = parsedAnswer.products.map(product => {
-  const matched = relevantProducts.find(p =>
-    p.id === product.id || p.slug === product.slug
-  );
+                // ✅ Gắn lại ảnh đúng từ DB nếu có
+                if (parsedAnswer.products) {
+                    parsedAnswer.products = parsedAnswer.products.map(product => {
+                        const matched = relevantProducts.find(p =>
+                            p.id === product.id || p.slug === product.slug
+                        );
 
-  return {
-    ...product,
-    image: matched?.images?.[0] || DEFAULT_IMAGE
-  };
-});
-    }
-  }
-} catch (e) {
-  console.error('Error parsing JSON response:', e);
-}
-
+                        return {
+                            ...product,
+                            image: matched?.images?.[0] || DEFAULT_IMAGE
+                        };
+                    });
+                }
+            }
+        } catch (e) {
+            console.error('❌ Error parsing JSON response:', e);
+        }
 
         // Save chat history
         if (!chatHistory.has(userId)) {
             chatHistory.set(userId, []);
         }
         
-        chatHistory.get(userId).push({
+        const historyEntry = {
             question,
             answer: parsedAnswer || answer,
-            timestamp: new Date()
-        });
+            timestamp: new Date(),
+            productsFound: relevantProducts.length,
+            productNames: relevantProducts.map(p => p.name)
+        };
+        
+        chatHistory.get(userId).push(historyEntry);
+        
+        // Giới hạn lịch sử chat
+        const userHistory = chatHistory.get(userId);
+        if (userHistory.length > 10) {
+            userHistory.shift();
+        }
 
+        console.log('✅ Question processed successfully');
+        console.log('📊 Final answer type:', parsedAnswer ? 'JSON' : 'TEXT');
+        
         return parsedAnswer || answer;
     } catch (error) {
-        console.error('Error in askQuestion:', error);
-        return 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại sau.';
+        console.error('❌ Critical error in askQuestion:', error);
+        return 'Xin lỗi, đã có lỗi xảy ra khi xử lý câu hỏi của bạn. Vui lòng thử lại sau hoặc liên hệ với chúng tôi để được hỗ trợ.';
     }
 }
 
-module.exports = { askQuestion };
+// ✅ THÊM: Hàm debug để kiểm tra kết quả tìm kiếm
+async function debugSearch(query) {
+    try {
+        console.log('🐛 DEBUG: Testing search for:', query);
+        
+        const results = await getRelevantProducts(query, 5);
+        
+        console.log('🐛 DEBUG Results:');
+        console.log('📊 Total found:', results.length);
+        
+        results.forEach((product, index) => {
+            console.log(`🐛 Product ${index + 1}:`, {
+                id: product.id,
+                name: product.name,
+                brand: product.brand,
+                price: product.price,
+                category: product.category?.name
+            });
+        });
+        
+        return results;
+    } catch (error) {
+        console.error('🐛 DEBUG Error:', error);
+        return [];
+    }
+}
+
+// ✅ THÊM: Hàm kiểm tra sức khỏe của database
+async function healthCheck() {
+    try {
+        console.log('🏥 Running health check...');
+        
+        const [productCount, categoryCount] = await Promise.all([
+            modelProduct.countDocuments({}),
+            modelCategory.countDocuments({})
+        ]);
+        
+        console.log('📊 Database Status:');
+        console.log('📱 Total products:', productCount);
+        console.log('🏷️ Total categories:', categoryCount);
+        
+        if (productCount === 0) {
+            console.warn('⚠️ WARNING: No products found in database!');
+        }
+        
+        if (categoryCount === 0) {
+            console.warn('⚠️ WARNING: No categories found in database!');
+        }
+        
+        // Test một vài truy vấn mẫu
+        const testQueries = ['iphone', 'samsung', 'điện thoại'];
+        
+        for (const query of testQueries) {
+            const results = await getRelevantProducts(query, 3);
+            console.log(`🔍 Test query "${query}": ${results.length} results`);
+        }
+        
+        return {
+            status: 'healthy',
+            productCount,
+            categoryCount,
+            timestamp: new Date()
+        };
+    } catch (error) {
+        console.error('🏥 Health check failed:', error);
+        return {
+            status: 'unhealthy',
+            error: error.message,
+            timestamp: new Date()
+        };
+    }
+}
+
+module.exports = { 
+    askQuestion,
+    debugSearch,
+    healthCheck,
+    getRelevantProducts,
+    smartProductSearch
+};
