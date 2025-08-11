@@ -36,10 +36,11 @@ function LoginUser() {
         try {
             const res = await requestLoginGoogle(credential);
             showSuccessProgress(SUCCESS_TYPES.LOGIN, res.message);
-            // Cập nhật state user và cart, sau đó điều hướng ngay
-            await fetchAuth();
-            await fetchCart();
+            // Điều hướng ngay lập tức
             navigate('/', { replace: true });
+            // Cập nhật state user và cart ở nền (không chờ)
+            fetchAuth();
+            fetchCart();
         } catch (error) {
             message.error(error.response.data.message);
         }
@@ -61,10 +62,11 @@ function LoginUser() {
         try {
             const res = await requestLogin(data);
             showSuccessProgress(SUCCESS_TYPES.LOGIN, res.metadata.message || 'Đăng nhập thành công!');
-            // Cập nhật state user và cart, sau đó điều hướng ngay
-            await fetchAuth();
-            await fetchCart();
+            // Điều hướng ngay lập tức
             navigate('/', { replace: true });
+            // Cập nhật state user và cart ở nền (không chờ)
+            fetchAuth();
+            fetchCart();
         } catch (error) {
             const errorMessage = error.response?.data?.message || 'Đăng nhập thất bại!';
             showSuccessProgress(SUCCESS_TYPES.LOGIN_FAILED, errorMessage);
