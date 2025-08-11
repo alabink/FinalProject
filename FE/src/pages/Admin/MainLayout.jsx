@@ -138,16 +138,18 @@ const MainLayout = () => {
     const [isChecking, setIsChecking] = useState(true);
     const [isAllowed, setIsAllowed] = useState(false);
 
+    // Immediate client-side checks for faster redirect
+    const isLogged = cookies.get('logged');
+    if (!isLogged) {
+        return <Navigate to="/" replace />;
+    }
+    if (dataUser && Object.keys(dataUser).length > 0 && !dataUser.isAdmin) {
+        return <Navigate to="/" replace />;
+    }
+
     useEffect(() => {
         const checkAccess = async () => {
-            // If not logged in, redirect to login
-            const isLogged = cookies.get('logged');
-            if (!isLogged) {
-                setIsChecking(false);
-                setIsAllowed(false);
-                return;
-            }
-
+            // Backend verification as fallback
             try {
                 await requestAdmin();
                 setIsAllowed(true);
