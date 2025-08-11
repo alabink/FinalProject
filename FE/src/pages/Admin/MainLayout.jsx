@@ -143,7 +143,7 @@ const MainLayout = () => {
     if (!isLogged) {
         return <Navigate to="/" replace />;
     }
-    if (dataUser && Object.keys(dataUser).length > 0 && !dataUser.isAdmin) {
+    if (dataUser && Object.keys(dataUser).length > 0 && dataUser.isAdmin !== true) {
         return <Navigate to="/" replace />;
     }
 
@@ -163,8 +163,15 @@ const MainLayout = () => {
         checkAccess();
     }, []);
 
-    if (isChecking) return null;
-    if (!isAllowed) return <Navigate to="/" replace />;
+    // Show loading while checking backend
+    if (isChecking) {
+        return <div>Loading...</div>;
+    }
+    
+    // If backend check failed, redirect
+    if (!isAllowed) {
+        return <Navigate to="/" replace />;
+    }
 
     // Custom menu item renderer to add badges and active indicators
     const getMenuItem = (item) => {
