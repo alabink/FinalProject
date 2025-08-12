@@ -140,8 +140,8 @@ class PaymentsController {
                 var requestId = partnerCode + new Date().getTime();
                 var orderId = requestId;
                 var orderInfo = `thanh toan ${findCart._id}`; // nội dung giao dịch thanh toán
-                var redirectUrl = 'http://localhost:3000/api/check-payment-momo'; // 8080
-                var ipnUrl = 'http://localhost:3000/api/check-payment-momo';
+                var redirectUrl = `${process.env.SERVER_URL || 'https://techify.asia'}/api/check-payment-momo`;
+                var ipnUrl = `${process.env.SERVER_URL || 'https://techify.asia'}/api/check-payment-momo`;
                 var amount = totalPrice;
                 var requestType = 'captureWallet';
                 var extraData = ''; //pass empty value if your merchant does not have stores
@@ -218,7 +218,7 @@ class PaymentsController {
                     vnp_TxnRef: findCart._id,
                     vnp_OrderInfo: `${findCart._id}`,
                     vnp_OrderType: ProductCode.Other,
-                    vnp_ReturnUrl: `${process.env.SERVER_URL || 'http://localhost:3000'}/api/check-payment-vnpay`,
+                    vnp_ReturnUrl: `${process.env.SERVER_URL || 'https://techify.asia'}/api/check-payment-vnpay`,
                     vnp_Locale: VnpLocale.VN,
                     vnp_CreateDate: dateFormat(new Date()),
                     vnp_ExpireDate: dateFormat(tomorrow),
@@ -304,7 +304,7 @@ class PaymentsController {
             // Track purchases for recommendation system
             await trackPurchases(newPayment.userId, momoOrderProducts);
 
-            return res.redirect(`http://localhost:5173/payment/${newPayment._id}`);
+            return res.redirect(`${process.env.FRONTEND_URL || 'https://techify.asia'}/payment/${newPayment._id}`);
         }
     }
 
@@ -377,7 +377,7 @@ class PaymentsController {
             // Track purchases for recommendation system
             await trackPurchases(newPayment.userId, vnpayOrderProducts);
 
-            return res.redirect(`http://localhost:5173/payment/${newPayment._id}`);
+            return res.redirect(`${process.env.FRONTEND_URL || 'https://techify.asia'}/payment/${newPayment._id}`);
         }
     }
 
