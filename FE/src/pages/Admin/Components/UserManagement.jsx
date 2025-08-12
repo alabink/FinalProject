@@ -36,6 +36,23 @@ const AVATAR_BASE_URL = `${import.meta.env.VITE_API_URL_IMG}/uploads/avatars/`;
 // Default avatar image
 const DEFAULT_AVATAR = 'https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/man-user-color-icon.png';
 
+// Helpers to resolve avatar URL (Cloudinary or local filename)
+const resolveAvatar = (avatar) => {
+  if (!avatar) return '';
+  if (typeof avatar === 'string') return avatar;
+  if (typeof avatar === 'object') {
+    return avatar.secure_url || avatar.url || avatar.path || '';
+  }
+  return '';
+};
+
+const getAvatarUrl = (avatar) => {
+  const raw = resolveAvatar(avatar);
+  if (!raw) return DEFAULT_AVATAR;
+  if (/^https?:\/\//i.test(raw)) return raw; // Cloudinary or absolute URL
+  return AVATAR_BASE_URL ? `${AVATAR_BASE_URL}${raw}` : DEFAULT_AVATAR;
+};
+
 // Luxury particles effect
 const LuxuryParticles = () => {
   useEffect(() => {
@@ -140,7 +157,7 @@ const EditUserModal = ({ visible, onCancel, onOk, initialValues }) => {
                 <Avatar 
                     size={80} 
                     icon={<UserOutlined />} 
-                    src={initialValues?.avatar ? `${AVATAR_BASE_URL}${initialValues.avatar}` : DEFAULT_AVATAR}
+                    src={getAvatarUrl(initialValues?.avatar)}
                     className={cx('user-avatar')}
                 />
                 <div className={cx('user-avatar-name')}>{initialValues?.name}</div>
@@ -221,7 +238,7 @@ const UserCard = ({ user, onEdit, onToggleBlock, onDelete }) => {
                 <Avatar 
                     size={60} 
                     icon={<UserOutlined />} 
-                    src={user.avatar ? `${AVATAR_BASE_URL}${user.avatar}` : DEFAULT_AVATAR}
+                    src={getAvatarUrl(user.avatar)}
                     className={cx('user-card-avatar')}
                 />
                 <div className={cx('user-card-badges')}>
@@ -324,7 +341,7 @@ const UserManagement = () => {
                     <Avatar 
                         size={40} 
                         icon={<UserOutlined />}
-                        src={record.avatar ? `${AVATAR_BASE_URL}${record.avatar}` : DEFAULT_AVATAR}
+                        src={getAvatarUrl(record.avatar)}
                         className={cx('user-avatar-table')}
                     />
                     <div className={cx('user-details')}>
