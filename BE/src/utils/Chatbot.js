@@ -1,5 +1,6 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 require('dotenv').config();
+const mongoose = require('mongoose'); // Added missing import
 
 const genAI = new GoogleGenerativeAI(process.env.API_KEY_GEMINI);
 const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
@@ -53,36 +54,58 @@ async function getRelevantProducts(query, limit = 10) {
             return products.map(product => formatProduct(product));
         }
 
-        // Bước 2: Tách từ khóa thông minh
-        const keywords = extractKeywords(cleanQuery);
-        console.log('🔑 Keywords extracted:', keywords);
+        // Bước 2: Tìm kiếm đơn giản và hiệu quả
+        const searchConditions = [
+            { name: { $regex: cleanQuery, $options: 'i' } },
+            { brand: { $regex: cleanQuery, $options: 'i' } },
+            { description: { $regex: cleanQuery, $options: 'i' } }
+        ];
 
-        if (keywords.length === 0) {
-            // Fallback với aggregation đơn giản
-            const products = await modelProduct
+        // Tìm kiếm với OR condition
+        let products = await modelProduct
+            .find({ $or: searchConditions })
+            .populate('category')
+            .sort({ createdAt: -1 })
+            .limit(limit)
+            .lean();
+
+        console.log('📊 Found products:', products.length);
+
+        // Nếu không tìm thấy, thử tìm từng từ riêng lẻ
+        if (products.length === 0) {
+            const words = cleanQuery.split(' ').filter(word => word.length > 2);
+            console.log('🔄 Trying individual words:', words);
+            
+            for (const word of words) {
+                const wordProducts = await modelProduct
+                    .find({
+                        $or: [
+                            { name: { $regex: word, $options: 'i' } },
+                            { brand: { $regex: word, $options: 'i' } }
+                        ]
+                    })
+                    .populate('category')
+                    .sort({ createdAt: -1 })
+                    .limit(limit)
+                    .lean();
+                
+                if (wordProducts.length > 0) {
+                    products = wordProducts;
+                    console.log('✅ Found products with word:', word, 'count:', products.length);
+                    break;
+                }
+            }
+        }
+
+        // Nếu vẫn không có, trả về sản phẩm mới nhất
+        if (products.length === 0) {
+            console.log('⚠️ No products found, returning latest products...');
+            products = await modelProduct
                 .find({})
                 .populate('category')
                 .sort({ createdAt: -1 })
                 .limit(limit)
                 .lean();
-            
-            return products.map(product => formatProduct(product));
-        }
-
-        // Bước 3: Xây dựng pipeline aggregation được tối ưu
-        const pipeline = buildSearchPipeline(keywords, limit);
-        
-        console.log('⚙️ Search pipeline:', JSON.stringify(pipeline, null, 2));
-
-        // Bước 4: Thực hiện truy vấn
-        const products = await modelProduct.aggregate(pipeline);
-        
-        console.log('📊 Found products:', products.length);
-        console.log('📝 Product names:', products.map(p => p.name));
-
-        if (products.length === 0) {
-            console.log('⚠️ No products found, trying fallback search...');
-            return await fallbackSearch(cleanQuery, limit);
         }
 
         return products.map(product => formatProduct(product));
@@ -107,220 +130,40 @@ async function getRelevantProducts(query, limit = 10) {
     }
 }
 
-// ✅ Hàm tách từ khóa thông minh
-function extractKeywords(query) {
-    const stopWords = new Set([
-        'của', 'cho', 'và', 'có', 'là', 'được', 'trong', 'với', 'về', 
-        'tôi', 'bạn', 'này', 'đó', 'the', 'and', 'or', 'in', 'on', 'at',
-        'giá', 'bao', 'nhiêu', 'thế', 'nào', 'gì', 'sao', 'như'
-    ]);
-
-    return query
-        .split(/\s+/)
-        .map(word => word.trim())
-        .filter(word => word.length > 1 && !stopWords.has(word))
-        .filter(word => !/^\d+$/.test(word) || word.length > 3); // Giữ lại số có ý nghĩa
-}
-
-// ✅ Xây dựng pipeline tìm kiếm tối ưu
-function buildSearchPipeline(keywords, limit) {
-    // Tạo regex patterns cho từng keyword
-    const regexPatterns = keywords.map(keyword => ({
-        $regex: keyword,
-        $options: 'i'
-    }));
-
-    return [
-        // Bước 1: Join với category
-        {
-            $lookup: {
-                from: 'categories',
-                localField: 'category',
-                foreignField: '_id',
-                as: 'category'
-            }
-        },
-        {
-            $unwind: {
-                path: '$category',
-                preserveNullAndEmptyArrays: true
-            }
-        },
-        
-        // Bước 2: Tính điểm relevance
-        {
-            $addFields: {
-                relevanceScore: {
-                    $add: [
-                        // Điểm perfect match cho tên (trọng số 20)
-                        {
-                            $cond: {
-                                if: {
-                                    $or: keywords.map(keyword => ({
-                                        $regexMatch: {
-                                            input: { $toLower: '$name' },
-                                            regex: new RegExp(`\\b${keyword}\\b`, 'i')
-                                        }
-                                    }))
-                                },
-                                then: 20,
-                                else: 0
-                            }
-                        },
-                        
-                        // Điểm partial match cho tên (trọng số 15)
-                        {
-                            $multiply: [
-                                {
-                                    $size: {
-                                        $filter: {
-                                            input: regexPatterns,
-                                            cond: {
-                                                $regexMatch: {
-                                                    input: { $toLower: '$name' },
-                                                    regex: '$$this'
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                15
-                            ]
-                        },
-                        
-                        // Điểm brand match (trọng số 12)
-                        {
-                            $multiply: [
-                                {
-                                    $size: {
-                                        $filter: {
-                                            input: regexPatterns,
-                                            cond: {
-                                                $regexMatch: {
-                                                    input: { $toLower: { $ifNull: ['$brand', ''] } },
-                                                    regex: '$$this'
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                12
-                            ]
-                        },
-                        
-                        // Điểm category match (trọng số 8)
-                        {
-                            $multiply: [
-                                {
-                                    $size: {
-                                        $filter: {
-                                            input: regexPatterns,
-                                            cond: {
-                                                $regexMatch: {
-                                                    input: { $toLower: { $ifNull: ['$category.nameCategory', ''] } },
-                                                    regex: '$$this'
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                8
-                            ]
-                        },
-                        
-                        // Điểm description match (trọng số 5)
-                        {
-                            $multiply: [
-                                {
-                                    $size: {
-                                        $filter: {
-                                            input: regexPatterns,
-                                            cond: {
-                                                $regexMatch: {
-                                                    input: { $toLower: { $ifNull: ['$description', ''] } },
-                                                    regex: '$$this'
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                5
-                            ]
-                        }
-                    ]
-                }
-            }
-        },
-        
-        // Bước 3: Lọc sản phẩm có điểm > 0
-        {
-            $match: {
-                relevanceScore: { $gt: 0 }
-            }
-        },
-        
-        // Bước 4: Sắp xếp theo điểm relevance và thời gian
-        {
-            $sort: { 
-                relevanceScore: -1, 
-                createdAt: -1 
-            }
-        },
-        
-        // Bước 5: Giới hạn kết quả
-        {
-            $limit: limit
-        }
-    ];
-}
-
-// ✅ Fallback search khi không tìm thấy kết quả
-async function fallbackSearch(query, limit) {
-    try {
-        console.log('🔄 Executing fallback search for:', query);
-        
-        // Thử tìm kiếm với text search index (nếu có)
-        let products = await modelProduct
-            .find({
-                $or: [
-                    { name: { $regex: query, $options: 'i' } },
-                    { brand: { $regex: query, $options: 'i' } },
-                    { description: { $regex: query, $options: 'i' } }
-                ]
-            })
-            .populate('category')
-            .limit(limit)
-            .lean();
-
-        if (products.length === 0) {
-            // Nếu vẫn không có, thử tìm từng từ
-            const words = query.split(' ').filter(word => word.length > 2);
-            for (const word of words) {
-                products = await modelProduct
-                    .find({
-                        $or: [
-                            { name: { $regex: word, $options: 'i' } },
-                            { brand: { $regex: word, $options: 'i' } }
-                        ]
-                    })
-                    .populate('category')
-                    .limit(limit)
-                    .lean();
-                
-                if (products.length > 0) break;
-            }
-        }
-
-        console.log('🔄 Fallback found:', products.length, 'products');
-        return products.map(product => formatProduct(product));
-    } catch (error) {
-        console.error('❌ Fallback search error:', error);
-        return [];
-    }
-}
-
 // ✅ Helper function để format product data - CẢI TIẾN
 function formatProduct(product) {
+    // Xử lý variants để lấy thông tin màu sắc và bộ nhớ
+    let colors = [];
+    let storages = [];
+    let priceRange = { min: product.price || 0, max: product.price || 0 };
+    
+    if (product.variants && product.variants.length > 0) {
+        // Lấy danh sách màu sắc duy nhất
+        const uniqueColors = new Map();
+        product.variants.forEach(variant => {
+            if (variant.color && variant.color.name) {
+                uniqueColors.set(variant.color.name, variant.color);
+            }
+        });
+        colors = Array.from(uniqueColors.values());
+        
+        // Lấy danh sách bộ nhớ duy nhất
+        const uniqueStorages = new Set();
+        product.variants.forEach(variant => {
+            if (variant.storage && variant.storage.size) {
+                uniqueStorages.add(variant.storage.size);
+            }
+        });
+        storages = Array.from(uniqueStorages);
+        
+        // Tính khoảng giá
+        const prices = product.variants.map(v => v.priceDiscount || v.price).filter(p => p > 0);
+        if (prices.length > 0) {
+            priceRange.min = Math.min(...prices);
+            priceRange.max = Math.max(...prices);
+        }
+    }
+
     return {
         id: product._id.toString(),
         name: product.name || '',
@@ -338,7 +181,11 @@ function formatProduct(product) {
             description: product.category.description || ''
         } : null,
         images: product.images?.map(img => getImageUrl(img)) || [DEFAULT_IMAGE],
-        slug: product.slug || product._id.toString()
+        slug: product.slug || product._id.toString(),
+        // Thêm thông tin variants đã xử lý
+        availableColors: colors.map(c => c.name),
+        availableStorages: storages,
+        priceRange: priceRange
     };
 }
 
@@ -501,18 +348,18 @@ async function createIntelligentPrompt(question, context, relevantProducts, cate
     // ✅ CẢI TIẾN: Hiển thị thông tin sản phẩm chi tiết hơn
     const productInfo = relevantProducts.map((product, index) => {
         let variantInfo = '';
-        if (product.variants && product.variants.length > 0) {
-            const colors = [...new Set(product.variants.map(v => v.color?.name).filter(Boolean))];
-            const storages = [...new Set(product.variants.map(v => v.storage?.size).filter(Boolean))];
-            const priceRange = {
-                min: Math.min(...product.variants.map(v => v.priceDiscount || v.price)),
-                max: Math.max(...product.variants.map(v => v.price))
-            };
-            
-            variantInfo = `
-Màu sắc có sẵn: ${colors.length > 0 ? colors.join(', ') : 'Không có thông tin'}
-Phiên bản bộ nhớ: ${storages.length > 0 ? storages.join(', ') : 'Không có thông tin'}
-Khoảng giá: ${priceRange.min.toLocaleString('vi-VN')}đ - ${priceRange.max.toLocaleString('vi-VN')}đ`;
+        
+        // Hiển thị thông tin màu sắc và bộ nhớ từ variants đã xử lý
+        if (product.availableColors && product.availableColors.length > 0) {
+            variantInfo += `\nMàu sắc có sẵn: ${product.availableColors.join(', ')}`;
+        }
+        
+        if (product.availableStorages && product.availableStorages.length > 0) {
+            variantInfo += `\nPhiên bản bộ nhớ: ${product.availableStorages.join(', ')}`;
+        }
+        
+        if (product.priceRange && product.priceRange.min !== product.priceRange.max) {
+            variantInfo += `\nKhoảng giá: ${product.priceRange.min.toLocaleString('vi-VN')}đ - ${product.priceRange.max.toLocaleString('vi-VN')}đ`;
         }
 
         const attributesText = Object.entries(product.attributes || {})
@@ -592,7 +439,7 @@ QUY TẮC TRẢ LỜI QUAN TRỌNG:
 5. KHI TRẢ LỜI VỀ SẢN PHẨM:
    - QUAN TRỌNG: Nếu câu hỏi về MÀU SẮC, PHIÊN BẢN, BỘ NHỚ của sản phẩm:
      * Trả lời dạng TEXT thông thường
-     * Liệt kê đầy đủ các màu sắc và phiên bản có sẵn
+     * Liệt kê đầy đủ các màu sắc và phiên bản có sẵn từ thông tin trong danh sách
      * Không sử dụng JSON format
      * Không hiển thị ảnh hay link sản phẩm
    
@@ -637,6 +484,22 @@ Hãy áp dụng các quy tắc trên để trả lời câu hỏi một cách ch
 async function askQuestion(question, userId = 'guest') {
     try {
         console.log('🎤 Processing question:', question, 'for user:', userId);
+        
+        // Kiểm tra kết nối database trước
+        if (mongoose.connection.readyState !== 1) {
+            console.warn('⚠️ Database not connected, attempting to connect...');
+            try {
+                await mongoose.connect(process.env.CONNECT_DB || 'mongodb://localhost:27017/techify', {
+                    useNewUrlParser: true,
+                    useUnifiedTopology: true,
+                    serverSelectionTimeoutMS: 5000
+                });
+                console.log('✅ Database connected successfully');
+            } catch (dbError) {
+                console.error('❌ Database connection failed:', dbError.message);
+                return 'Xin lỗi, hiện tại hệ thống đang gặp sự cố kết nối. Vui lòng thử lại sau.';
+            }
+        }
         
         // Tối ưu hóa: Tăng số lượng sản phẩm để có kết quả tốt hơn
         const [relevantProducts, categories] = await Promise.all([
