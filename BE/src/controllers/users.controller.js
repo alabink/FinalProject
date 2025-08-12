@@ -399,6 +399,7 @@ class controllerUsers {
             // Tính doanh thu theo period
             let periodRevenue = [];
             let periodOrders = [];
+            let periodTotalRevenue = 0;
             
             if (period === 'day') {
                 // Thống kê theo giờ trong ngày hôm nay
@@ -425,6 +426,7 @@ class controllerUsers {
                         orderCount
                     });
                 }
+                periodTotalRevenue = todayRevenue;
             } else if (period === 'week') {
                 // Thống kê 7 ngày gần đây
                 for (let i = 6; i >= 0; i--) {
@@ -456,6 +458,7 @@ class controllerUsers {
                         orderCount
                     });
                 }
+                periodTotalRevenue = periodRevenue.reduce((sum, item) => sum + item.revenue, 0);
             } else if (period === 'month') {
                 // Thống kê theo ngày trong tháng hiện tại
                 const currentMonth = new Date();
@@ -484,6 +487,7 @@ class controllerUsers {
                         orderCount
                     });
                 }
+                periodTotalRevenue = periodRevenue.reduce((sum, item) => sum + item.revenue, 0);
             }
 
             // Lấy 10 đơn hàng gần đây nhất với thông tin sản phẩm
@@ -534,6 +538,7 @@ class controllerUsers {
                 completedOrders,
                 todayRevenue,
                 periodRevenue,
+                periodTotalRevenue,
                 period,
                 recentOrders: recentOrdersWithProducts
             };

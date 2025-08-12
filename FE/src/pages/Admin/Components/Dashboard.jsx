@@ -45,6 +45,7 @@ const Dashboard = () => {
         completedOrders: 0,
         todayRevenue: 0,
         periodRevenue: [],
+        periodTotalRevenue: 0,
         period: 'week',
         recentOrders: [],
     });
@@ -302,17 +303,32 @@ const Dashboard = () => {
 
                 <Card className={cx('stat-card')} loading={isLoading}>
                     <div className={cx('stat-header')}>
-                        <h4 className={cx('stat-title')}>Doanh thu hôm nay</h4>
+                        <h4 className={cx('stat-title')}>
+                            {selectedPeriod === 'day' ? 'Doanh thu hôm nay' :
+                             selectedPeriod === 'week' ? 'Doanh thu tuần này' :
+                             selectedPeriod === 'month' ? 'Doanh thu tháng này' : 'Doanh thu hôm nay'}
+                        </h4>
                         <div className={cx('stat-icon', 'revenue')}>
                             <DollarOutlined />
                         </div>
                     </div>
                     <div className={cx('stat-value')}>
-                        {stats.todayRevenue?.toLocaleString() || '0'} VNĐ
+                        {(() => {
+                            if (selectedPeriod === 'day') {
+                                return stats.todayRevenue?.toLocaleString() || '0';
+                            } else if (selectedPeriod === 'week') {
+                                return stats.periodTotalRevenue?.toLocaleString() || '0';
+                            } else if (selectedPeriod === 'month') {
+                                return stats.periodTotalRevenue?.toLocaleString() || '0';
+                            }
+                            return stats.todayRevenue?.toLocaleString() || '0';
+                        })()} VNĐ
                     </div>
                     <div className={cx('stat-description')}>
                         <ArrowUpOutlined className={cx('trend-icon', 'up')} />
-                        Doanh thu trong ngày
+                        {selectedPeriod === 'day' ? 'Doanh thu trong ngày' :
+                         selectedPeriod === 'week' ? 'Doanh thu trong tuần' :
+                         selectedPeriod === 'month' ? 'Doanh thu trong tháng' : 'Doanh thu trong ngày'}
                     </div>
                 </Card>
             </div>
