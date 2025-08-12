@@ -480,7 +480,13 @@ function Header() {
                                         >
                                             <Avatar 
                                                 size={40}
-                                                src={dataUser.avatar || DEFAULT_AVATAR_URL}
+                                                src={dataUser.avatar ? 
+                                                    (typeof dataUser.avatar === 'object' ? 
+                                                        (dataUser.avatar.secure_url || dataUser.avatar.url || dataUser.avatar.path) :
+                                                        dataUser.avatar.startsWith('http') ? 
+                                                            dataUser.avatar : 
+                                                            `${import.meta.env.VITE_API_URL_IMG}/uploads/avatars/${dataUser.avatar}`
+                                                    ) : DEFAULT_AVATAR_URL}
                                                 className={cx('user-avatar')}
                                             />
                                             <span className={cx('username')}>

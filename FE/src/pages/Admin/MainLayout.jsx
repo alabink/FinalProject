@@ -262,7 +262,13 @@ const MainLayout = () => {
                         <Dropdown overlay={userMenu} trigger={['click']} placement="bottomRight">
                             <div className={cx('user-info')}>
                                 <Avatar
-                                    src={dataUser.avatar ? `${import.meta.env.VITE_API_URL_IMG}/uploads/avatars/${dataUser.avatar}` : undefined}
+                                    src={dataUser.avatar ? 
+                                        (typeof dataUser.avatar === 'object' ? 
+                                            (dataUser.avatar.secure_url || dataUser.avatar.url || dataUser.avatar.path) :
+                                            dataUser.avatar.startsWith('http') ? 
+                                                dataUser.avatar : 
+                                                `${import.meta.env.VITE_API_URL_IMG}/uploads/avatars/${dataUser.avatar}`
+                                        ) : undefined}
                                     icon={<UserOutlined />}
                                 />
                                 <span className={cx('user-name')}>
