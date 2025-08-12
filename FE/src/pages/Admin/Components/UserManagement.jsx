@@ -697,7 +697,7 @@ const UserManagement = () => {
                 transition={{ duration: 0.6, delay: 0.2 }}
             >
                 <Row gutter={[16, 16]} justify="space-between">
-                    <Col xs={24} sm={12} md={4.8}>
+                    <Col xs={24} sm={12} md={4.8} lg={4.8} xl={4.8}>
                         <motion.div 
                             whileHover={{ y: -10, transition: { duration: 0.3 } }}
                             className={cx('stat-card', 'total-card')}
@@ -713,7 +713,7 @@ const UserManagement = () => {
                         </div>
                         </motion.div>
                     </Col>
-                    <Col xs={24} sm={12} md={4.8}>
+                    <Col xs={24} sm={12} md={4.8} lg={4.8} xl={4.8}>
                         <motion.div 
                             whileHover={{ y: -10, transition: { duration: 0.3 } }}
                             className={cx('stat-card', 'admin-card')}
@@ -729,7 +729,7 @@ const UserManagement = () => {
                         </div>
                         </motion.div>
                     </Col>
-                    <Col xs={24} sm={12} md={4.8}>
+                    <Col xs={24} sm={12} md={4.8} lg={4.8} xl={4.8}>
                         <motion.div 
                             whileHover={{ y: -10, transition: { duration: 0.3 } }}
                             className={cx('stat-card', 'user-card')}
@@ -745,7 +745,7 @@ const UserManagement = () => {
                         </div>
                         </motion.div>
                     </Col>
-                    <Col xs={24} sm={12} md={4.8}>
+                    <Col xs={24} sm={12} md={4.8} lg={4.8} xl={4.8}>
                         <motion.div 
                             whileHover={{ y: -10, transition: { duration: 0.3 } }}
                             className={cx('stat-card', 'active-card')}
@@ -761,7 +761,7 @@ const UserManagement = () => {
                         </div>
                         </motion.div>
                     </Col>
-                    <Col xs={24} sm={12} md={4.8}>
+                    <Col xs={24} sm={12} md={4.8} lg={4.8} xl={4.8}>
                         <motion.div 
                             whileHover={{ y: -10, transition: { duration: 0.3 } }}
                             className={cx('stat-card', 'blocked-card')}

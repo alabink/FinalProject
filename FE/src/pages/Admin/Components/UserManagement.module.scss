@@ -125,10 +125,12 @@
       display: flex;
       justify-content: space-between;
       align-items: stretch;
+      flex-wrap: nowrap; /* Đảm bảo không wrap xuống dòng */
       
       .ant-col {
         flex: 1;
         margin: 0 8px;
+        min-width: 0; /* Cho phép col co lại */
         
         &:first-child {
           margin-left: 0;
@@ -148,11 +150,11 @@
       height: 100%;
       position: relative;
       overflow: hidden;
-      padding: 1.5rem;
+      padding: 1.25rem; /* Giảm padding để vừa 1 dòng */
       animation: slideInRight 0.8s ease-in-out;
       animation-fill-mode: both;
       background: #fff;
-      min-height: 140px;
+      min-height: 120px; /* Giảm chiều cao */
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -162,8 +164,8 @@
         position: absolute;
         top: 0;
         right: 0;
-        width: 120px;
-        height: 120px;
+        width: 100px; /* Giảm kích thước */
+        height: 100px;
         border-radius: 50%;
         background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, rgba(212, 175, 55, 0) 70%);
         transform: translate(30%, -30%);
@@ -197,42 +199,41 @@
       }
       
       .ant-statistic-title {
-        font-size: 1rem;
+        font-size: 0.9rem; /* Giảm font size */
         color: #666;
-        margin-bottom: 12px;
+        margin-bottom: 8px; /* Giảm margin */
         font-weight: 500;
         position: relative;
         z-index: 2;
         font-family: var(--luxury-font-secondary);
-        line-height: 1.3;
+        line-height: 1.2;
       }
       
       .ant-statistic-content {
-        font-size: 2.25rem;
+        font-size: 1.75rem; /* Giảm font size */
         font-weight: 700;
         color: var(--luxury-navy);
         position: relative;
         z-index: 2;
-        font-family: var(--luxury-font-primary);
-        margin-bottom: 8px;
+        margin-bottom: 6px; /* Giảm margin */
         
         .ant-statistic-content-prefix {
-          margin-right: 12px;
-          font-size: 1.25rem;
-          width: 40px;
-          height: 40px;
-          border-radius: 10px;
+          margin-right: 8px; /* Giảm margin */
+          font-size: 1rem; /* Giảm font size */
+          width: 32px; /* Giảm kích thước */
+          height: 32px;
+          border-radius: 8px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 6px 16px rgba(212, 175, 55, 0.3);
+          box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
           position: relative;
           
           &::after {
             content: '';
             position: absolute;
             inset: 0;
-            border-radius: 10px;
+            border-radius: 8px;
             padding: 2px;
             background: var(--royal-gold-gradient);
             -webkit-mask: 
@@ -247,9 +248,9 @@
       
       .stat-icon {
         position: absolute;
-        bottom: -15px;
-        right: -8px;
-        font-size: 5rem;
+        bottom: -10px; /* Điều chỉnh vị trí */
+        right: -6px;
+        font-size: 3.5rem; /* Giảm font size */
         opacity: 0.08;
         transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         transform-origin: center;
@@ -324,7 +325,7 @@
     }
     
     /* Responsive Design */
-    @media (max-width: 1200px) {
+    @media (max-width: 1400px) {
       .ant-row {
         .ant-col {
           margin: 0 4px;
@@ -332,19 +333,44 @@
       }
       
       .stat-card {
-        padding: 1.25rem;
-        min-height: 130px;
+        padding: 1rem;
+        min-height: 110px;
         
         .ant-statistic-title {
-          font-size: 0.9rem;
+          font-size: 0.8rem;
         }
         
         .ant-statistic-content {
-          font-size: 2rem;
+          font-size: 1.5rem;
         }
         
         .stat-icon {
-          font-size: 4rem;
+          font-size: 3rem;
+        }
+      }
+    }
+    
+    @media (max-width: 1200px) {
+      .ant-row {
+        .ant-col {
+          margin: 0 3px;
+        }
+      }
+      
+      .stat-card {
+        padding: 0.875rem;
+        min-height: 100px;
+        
+        .ant-statistic-title {
+          font-size: 0.75rem;
+        }
+        
+        .ant-statistic-content {
+          font-size: 1.25rem;
+        }
+        
+        .stat-icon {
+          font-size: 2.5rem;
         }
       }
     }
