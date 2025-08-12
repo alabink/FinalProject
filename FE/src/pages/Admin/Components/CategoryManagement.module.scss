@@ -347,6 +347,8 @@
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
       overflow: hidden;
       border: 1px solid rgba(212, 175, 55, 0.1);
+      position: relative;
+      z-index: 1;
       
       .table-header, .grid-header {
         padding: 24px;
@@ -395,6 +397,8 @@
     
     .category-table {
       border-radius: 0;
+      position: relative;
+      z-index: 2;
       
       :global {
         .ant-table-thead > tr > th {
@@ -430,6 +434,8 @@
       
       .table-row {
         transition: all 0.3s ease;
+        position: relative;
+        z-index: 1;
         
         &.has-products {
           background-color: rgba(212, 175, 55, 0.05);
@@ -438,7 +444,7 @@
         &:hover {
           transform: translateY(-2px);
           box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-          z-index: 1;
+          z-index: 2;
         }
       }
       
@@ -520,6 +526,9 @@
       }
       
       .action-buttons {
+        position: relative;
+        z-index: 10;
+        
         .edit-button, .delete-button {
           border-radius: 12px;
           display: flex;
@@ -527,6 +536,9 @@
           gap: 6px;
           transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
           height: 38px;
+          position: relative;
+          z-index: 11;
+          pointer-events: auto;
           
           &:hover {
             transform: translateY(-3px);
@@ -565,6 +577,7 @@
         transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         position: relative;
         background: #fff;
+        z-index: 1;
         
         &:hover {
           transform: translateY(-8px);
@@ -616,6 +629,7 @@
           padding: 28px 20px;
           position: relative;
           overflow: hidden;
+          z-index: 5;
           
           .category-card-header {
             position: relative;
@@ -623,13 +637,14 @@
             display: flex;
             justify-content: center;
             margin-bottom: 20px;
+            z-index: 6;
             
             .category-card-avatar {
               font-size: 26px;
               font-weight: 600;
               box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
               transition: all 0.3s ease;
-              z-index: 1;
+              z-index: 7;
               background: var(--luxury-gold-gradient) !important;
               font-family: var(--luxury-font-primary);
               
@@ -651,9 +666,9 @@
             
             .category-card-badge-container {
               position: absolute;
-              top: -4px;
-              right: 50%;
-              transform: translateX(32px);
+              top: -8px;
+              right: -8px;
+              z-index: 9;
               
               .category-card-badge {
                 transform: scale(1.2);
@@ -674,8 +689,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin: 20px 0;
+            width: 100%;
+            z-index: 8;
             
             .card-status-tag {
               font-weight: 500;
@@ -706,6 +723,8 @@
             display: flex;
             gap: 16px;
             width: 100%;
+            position: relative;
+            z-index: 10;
             
             .card-edit-btn, .card-delete-btn {
               flex: 1;
@@ -717,8 +736,11 @@
               justify-content: center;
               gap: 8px;
               transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+              position: relative;
+              z-index: 11;
+              pointer-events: auto;
               
-      &:hover {
+              &:hover {
                 transform: translateY(-3px);
                 box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
               }
@@ -750,7 +772,8 @@
             right: -120px;
             transition: all 0.5s ease;
             z-index: 0;
-      }
+            pointer-events: none;
+          }
     }
   }
       

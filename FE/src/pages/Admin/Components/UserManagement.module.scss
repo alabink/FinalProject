@@ -549,6 +549,9 @@
   }
 
   .users-table {
+    position: relative;
+    z-index: 2;
+    
     .ant-table {
       border-radius: 12px;
       overflow: hidden;
@@ -818,7 +821,7 @@
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     position: relative;
     background: #fff;
-    height: 100%;
+    z-index: 1;
 
     &:hover {
       transform: translateY(-8px);
@@ -873,6 +876,7 @@
       align-items: center;
       padding: 1.75rem 1rem 1.25rem;
       position: relative;
+      z-index: 6;
     }
     
     .user-card-avatar {
@@ -880,6 +884,8 @@
       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
       transition: all 0.3s ease;
       background: var(--luxury-gold-gradient) !important;
+      position: relative;
+      z-index: 9;
       
       &::after {
         content: '';
@@ -901,6 +907,7 @@
       position: absolute;
       top: 0.75rem;
       right: 0.75rem;
+      z-index: 8;
       
       .admin-badge {
         width: 28px;
@@ -918,6 +925,8 @@
     .user-card-info {
       padding: 1rem;
       text-align: center;
+      position: relative;
+      z-index: 7;
       
       .user-card-name {
         font-size: 1.2rem;
@@ -943,6 +952,14 @@
       display: flex;
       justify-content: center;
       border-top: 1px solid rgba(212, 175, 55, 0.1);
+      position: relative;
+      z-index: 10;
+      
+      .edit-button, .toggle-block-button, .delete-button {
+        position: relative;
+        z-index: 11;
+        pointer-events: auto;
+      }
     }
     
     .card-decoration {
@@ -955,6 +972,7 @@
       right: -120px;
       transition: all 0.5s ease;
       z-index: 0;
+      pointer-events: none;
     }
   }
   
