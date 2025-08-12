@@ -121,6 +121,25 @@
     margin-bottom: 32px;
     animation: fadeIn 0.8s ease-in-out;
 
+    .ant-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: stretch;
+      
+      .ant-col {
+        flex: 1;
+        margin: 0 8px;
+        
+        &:first-child {
+          margin-left: 0;
+        }
+        
+        &:last-child {
+          margin-right: 0;
+        }
+      }
+    }
+
     .stat-card {
       border-radius: 16px;
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
@@ -129,10 +148,14 @@
       height: 100%;
       position: relative;
       overflow: hidden;
-      padding: 1.75rem;
+      padding: 1.5rem;
       animation: slideInRight 0.8s ease-in-out;
       animation-fill-mode: both;
       background: #fff;
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
       
       &::before {
         content: '';
@@ -174,29 +197,31 @@
       }
       
       .ant-statistic-title {
-        font-size: 1.1rem;
+        font-size: 1rem;
         color: #666;
-        margin-bottom: 14px;
+        margin-bottom: 12px;
         font-weight: 500;
         position: relative;
         z-index: 2;
         font-family: var(--luxury-font-secondary);
+        line-height: 1.3;
       }
       
       .ant-statistic-content {
-        font-size: 2.75rem;
+        font-size: 2.25rem;
         font-weight: 700;
         color: var(--luxury-navy);
         position: relative;
         z-index: 2;
         font-family: var(--luxury-font-primary);
+        margin-bottom: 8px;
         
         .ant-statistic-content-prefix {
-          margin-right: 14px;
-          font-size: 1.5rem;
-          width: 46px;
-          height: 46px;
-          border-radius: 12px;
+          margin-right: 12px;
+          font-size: 1.25rem;
+          width: 40px;
+          height: 40px;
+          border-radius: 10px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
@@ -207,7 +232,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            border-radius: 12px;
+            border-radius: 10px;
             padding: 2px;
             background: var(--royal-gold-gradient);
             -webkit-mask: 
@@ -222,13 +247,14 @@
       
       .stat-icon {
         position: absolute;
-        bottom: -20px;
-        right: -10px;
-        font-size: 7rem;
-        opacity: 0.1;
+        bottom: -15px;
+        right: -8px;
+        font-size: 5rem;
+        opacity: 0.08;
         transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         transform-origin: center;
         z-index: 1;
+        color: var(--luxury-navy);
       }
       
       &.total-card {
@@ -280,6 +306,73 @@
         
         .stat-icon {
           color: rgba(179, 135, 40, 0.15);
+        }
+      }
+      
+      &.blocked-card {
+        background: linear-gradient(135deg, rgba(255, 77, 79, 0.05), rgba(255, 77, 79, 0.02));
+        
+        .ant-statistic-content-prefix {
+          color: white;
+          background: linear-gradient(135deg, #ff4d4f, #cf1322);
+        }
+        
+        .stat-icon {
+          color: rgba(255, 77, 79, 0.15);
+        }
+      }
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+      .ant-row {
+        .ant-col {
+          margin: 0 4px;
+        }
+      }
+      
+      .stat-card {
+        padding: 1.25rem;
+        min-height: 130px;
+        
+        .ant-statistic-title {
+          font-size: 0.9rem;
+        }
+        
+        .ant-statistic-content {
+          font-size: 2rem;
+        }
+        
+        .stat-icon {
+          font-size: 4rem;
+        }
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .ant-row {
+        flex-direction: column;
+        
+        .ant-col {
+          margin: 0 0 16px 0;
+          flex: none;
+        }
+      }
+      
+      .stat-card {
+        min-height: 120px;
+        padding: 1rem;
+        
+        .ant-statistic-title {
+          font-size: 0.85rem;
+        }
+        
+        .ant-statistic-content {
+          font-size: 1.75rem;
+        }
+        
+        .stat-icon {
+          font-size: 3.5rem;
         }
       }
     }
@@ -619,6 +712,75 @@
     &:hover {
       transform: translateY(-3px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .anticon {
+      margin-right: 6px;
+    }
+  }
+
+  .toggle-block-button {
+    border-radius: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    padding: 8px 16px;
+    height: 38px;
+    background: linear-gradient(135deg, #1890ff, #096dd9);
+    border: none;
+    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+    color: white;
+    
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 16px rgba(24, 144, 255, 0.4);
+      background: linear-gradient(135deg, #40a9ff, #1890ff);
+    }
+    
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+    }
+    
+    .anticon {
+      margin-right: 6px;
+    }
+    
+    &.ant-btn-default {
+      background: linear-gradient(135deg, #52c41a, #389e0d);
+      box-shadow: 0 4px 12px rgba(82, 196, 26, 0.3);
+      color: white;
+      
+      &:hover {
+        box-shadow: 0 8px 16px rgba(82, 196, 26, 0.4);
+        background: linear-gradient(135deg, #73d13d, #52c41a);
+      }
+      
+      &:active {
+        box-shadow: 0 2px 8px rgba(82, 196, 26, 0.3);
+      }
+    }
+  }
+
+  .delete-button {
+    border-radius: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    padding: 8px 16px;
+    height: 38px;
+    background: linear-gradient(135deg, #ff4d4f, #cf1322);
+    border: none;
+    box-shadow: 0 4px 12px rgba(255, 77, 79, 0.3);
+    color: white;
+    
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 16px rgba(255, 77, 79, 0.4);
+      background: linear-gradient(135deg, #ff7875, #ff4d4f);
+    }
+    
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3);
     }
     
     .anticon {

@@ -696,8 +696,8 @@ const UserManagement = () => {
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
             >
-                <Row gutter={[20, 20]}>
-                <Col xs={24} sm={12} md={6}>
+                <Row gutter={[16, 16]} justify="space-between">
+                    <Col xs={24} sm={12} md={4.8}>
                         <motion.div 
                             whileHover={{ y: -10, transition: { duration: 0.3 } }}
                             className={cx('stat-card', 'total-card')}
@@ -712,8 +712,8 @@ const UserManagement = () => {
                             <TeamOutlined />
                         </div>
                         </motion.div>
-                </Col>
-                <Col xs={24} sm={12} md={6}>
+                    </Col>
+                    <Col xs={24} sm={12} md={4.8}>
                         <motion.div 
                             whileHover={{ y: -10, transition: { duration: 0.3 } }}
                             className={cx('stat-card', 'admin-card')}
@@ -728,8 +728,8 @@ const UserManagement = () => {
                             <CrownOutlined />
                         </div>
                         </motion.div>
-                </Col>
-                <Col xs={24} sm={12} md={6}>
+                    </Col>
+                    <Col xs={24} sm={12} md={4.8}>
                         <motion.div 
                             whileHover={{ y: -10, transition: { duration: 0.3 } }}
                             className={cx('stat-card', 'user-card')}
@@ -744,8 +744,8 @@ const UserManagement = () => {
                             <UserOutlined />
                         </div>
                         </motion.div>
-                </Col>
-                <Col xs={24} sm={12} md={6}>
+                    </Col>
+                    <Col xs={24} sm={12} md={4.8}>
                         <motion.div 
                             whileHover={{ y: -10, transition: { duration: 0.3 } }}
                             className={cx('stat-card', 'active-card')}
@@ -760,8 +760,8 @@ const UserManagement = () => {
                             <CheckCircleOutlined />
                         </div>
                         </motion.div>
-                </Col>
-                <Col xs={24} sm={12} md={6}>
+                    </Col>
+                    <Col xs={24} sm={12} md={4.8}>
                         <motion.div 
                             whileHover={{ y: -10, transition: { duration: 0.3 } }}
                             className={cx('stat-card', 'blocked-card')}
@@ -776,8 +776,8 @@ const UserManagement = () => {
                             <StopOutlined />
                         </div>
                         </motion.div>
-                </Col>
-            </Row>
+                    </Col>
+                </Row>
             </motion.div>
 
             <motion.div

@@ -30,6 +30,8 @@ function routes(app) {
     app.post('/api/update-password', userRoutes);
     app.post('/api/login-google', userRoutes);
     app.post('/api/update-user', userRoutes);
+    app.post('/api/toggle-block-user', userRoutes);
+    app.post('/api/delete-user', userRoutes);
     app.get('/admin', userRoutes);
 
     app.post('/api/create-category', categoryRoutes);
