@@ -220,6 +220,16 @@ export const requestGetAllUser = async () => {
     return res.data;
 };
 
+export const requestToggleBlockUser = async (data) => {
+    const res = await request.post('/api/toggle-block-user', data);
+    return res.data;
+};
+
+export const requestDeleteUser = async (data) => {
+    const res = await request.post('/api/delete-user', data);
+    return res.data;
+};
+
 export const requestUpdateInfoUser = async (data) => {
     const res = await request.post('/api/update-info-user', data);
     return res.data;

@@ -20,9 +20,12 @@ import {
     EnvironmentOutlined,
     SafetyCertificateOutlined,
     TrophyOutlined,
-    ThunderboltOutlined
+    ThunderboltOutlined,
+    StopOutlined,
+    DeleteOutlined,
+    ExclamationCircleOutlined
 } from '@ant-design/icons';
-import { requestGetAllUser, requestUpdateUser } from '../../../Config/request';
+import { requestGetAllUser, requestUpdateUser, requestToggleBlockUser, requestDeleteUser } from '../../../Config/request';
 import styles from './UserManagement.module.scss';
 import classNames from 'classnames/bind';
 import { motion } from 'framer-motion';
@@ -199,7 +202,7 @@ const EditUserModal = ({ visible, onCancel, onOk, initialValues }) => {
     );
 };
 
-const UserCard = ({ user, onEdit }) => {
+const UserCard = ({ user, onEdit, onToggleBlock, onDelete }) => {
     return (
         <motion.div
             initial={{ scale: 0.95, opacity: 0.8 }}
@@ -210,7 +213,10 @@ const UserCard = ({ user, onEdit }) => {
                 transition: { duration: 0.3 }
             }}
         >
-        <Card className={cx('user-card', { 'admin-card': user.isAdmin })}>
+        <Card className={cx('user-card', { 
+            'admin-card': user.isAdmin,
+            'blocked-card': user.isBlocked && !user.isAdmin
+        })}>
             <div className={cx('user-card-header')}>
                 <Avatar 
                     size={60} 
@@ -226,6 +232,13 @@ const UserCard = ({ user, onEdit }) => {
                             </div>
                         </Tooltip>
                     )}
+                    {user.isBlocked && !user.isAdmin && (
+                        <Tooltip title="Tài khoản bị khóa">
+                            <div className={cx('blocked-badge')}>
+                                <StopOutlined />
+                            </div>
+                        </Tooltip>
+                    )}
                 </div>
             </div>
             <div className={cx('user-card-info')}>
@@ -235,6 +248,15 @@ const UserCard = ({ user, onEdit }) => {
                 </div>
                 <div className={cx('user-card-phone')}>
                     <PhoneOutlined /> {user.phone || 'Chưa cập nhật'}
+                </div>
+                <div className={cx('user-card-status')}>
+                    {user.isAdmin ? (
+                        <Tag color="gold">Quản trị viên</Tag>
+                    ) : user.isBlocked ? (
+                        <Tag color="red">Đã khóa</Tag>
+                    ) : (
+                        <Tag color="green">Hoạt động</Tag>
+                    )}
                 </div>
             </div>
             <div className={cx('user-card-footer')}>
@@ -246,6 +268,28 @@ const UserCard = ({ user, onEdit }) => {
                 >
                     Chỉnh sửa
                 </Button>
+                {!user.isAdmin && (
+                    <>
+                        <Button
+                            type={user.isBlocked ? "default" : "primary"}
+                            danger={user.isBlocked}
+                            icon={user.isBlocked ? <UnlockOutlined /> : <StopOutlined />}
+                            onClick={() => onToggleBlock(user)}
+                            className={cx('toggle-block-button')}
+                        >
+                            {user.isBlocked ? 'Mở khóa' : 'Khóa'}
+                        </Button>
+                        <Button
+                            type="primary"
+                            danger
+                            icon={<DeleteOutlined />}
+                            onClick={() => onDelete(user)}
+                            className={cx('delete-button')}
+                        >
+                            Xóa
+                        </Button>
+                    </>
+                )}
             </div>
                 <div className={cx('card-decoration')}></div>
         </Card>
@@ -261,12 +305,14 @@ const UserManagement = () => {
     const [loading, setLoading] = useState(false);
     const [searchText, setSearchText] = useState('');
     const [filterRole, setFilterRole] = useState('all');
+    const [filterStatus, setFilterStatus] = useState('all');
     const [viewMode, setViewMode] = useState('table'); // 'table' or 'card'
     const [stats, setStats] = useState({
         total: 0,
         admins: 0,
         regularUsers: 0,
-        activeUsers: 0
+        activeUsers: 0,
+        blockedUsers: 0
     });
 
     const columns = [
@@ -336,6 +382,29 @@ const UserManagement = () => {
             onFilter: (value, record) => record.isAdmin === value,
         },
         {
+            title: 'Trạng thái',
+            dataIndex: 'isBlocked',
+            key: 'isBlocked',
+            render: (isBlocked, record) => {
+                if (record.isAdmin) {
+                    return <Tag color="green" className={cx('status-tag')}>
+                        <CheckCircleOutlined /> Hoạt động
+                    </Tag>;
+                }
+                return (
+                    <Tag color={isBlocked ? 'red' : 'green'} className={cx('status-tag')}>
+                        {isBlocked ? <StopOutlined /> : <CheckCircleOutlined />} 
+                        {isBlocked ? 'Đã khóa' : 'Hoạt động'}
+                    </Tag>
+                );
+            },
+            filters: [
+                { text: 'Hoạt động', value: false },
+                { text: 'Đã khóa', value: true },
+            ],
+            onFilter: (value, record) => record.isBlocked === value,
+        },
+        {
             title: 'Thao tác',
             key: 'action',
             render: (_, record) => (
@@ -356,6 +425,28 @@ const UserManagement = () => {
                     >
                         {record.isAdmin ? 'Hủy quyền admin' : 'Cấp quyền admin'}
                     </Button>
+                    {!record.isAdmin && (
+                        <>
+                            <Button
+                                type={record.isBlocked ? "default" : "primary"}
+                                danger={record.isBlocked}
+                                icon={record.isBlocked ? <UnlockOutlined /> : <StopOutlined />}
+                                onClick={() => handleToggleBlock(record)}
+                                className={cx('toggle-block-button')}
+                            >
+                                {record.isBlocked ? 'Mở khóa' : 'Khóa tài khoản'}
+                            </Button>
+                            <Button
+                                type="primary"
+                                danger
+                                icon={<DeleteOutlined />}
+                                onClick={() => handleDelete(record)}
+                                className={cx('delete-button')}
+                            >
+                                Xóa tài khoản
+                            </Button>
+                        </>
+                    )}
                 </div>
             ),
         },
@@ -374,7 +465,8 @@ const UserManagement = () => {
                 total: users.length,
                 admins: users.filter(user => user.isAdmin).length,
                 regularUsers: users.filter(user => !user.isAdmin).length,
-                activeUsers: users.length // Assuming all users are active for now
+                activeUsers: users.filter(user => !user.isBlocked).length,
+                blockedUsers: users.filter(user => user.isBlocked).length
             });
             
             setLoading(false);
@@ -391,7 +483,7 @@ const UserManagement = () => {
 
     useEffect(() => {
         handleFilter();
-    }, [searchText, filterRole, dataUsers]);
+    }, [searchText, filterRole, filterStatus, dataUsers]);
 
     const handleEdit = (user) => {
         setSelectedUser(user);
@@ -417,6 +509,64 @@ const UserManagement = () => {
         } catch (error) {
             message.error('Có lỗi xảy ra khi cập nhật quyền người dùng!');
         }
+    };
+
+    const handleToggleBlock = async (user) => {
+        try {
+            const action = user.isBlocked ? 'mở khóa' : 'khóa';
+            
+            Modal.confirm({
+                title: `Xác nhận ${action} tài khoản`,
+                content: `Bạn có chắc chắn muốn ${action} tài khoản của ${user.name}?`,
+                icon: <ExclamationCircleOutlined style={{ color: user.isBlocked ? '#52c41a' : '#ff4d4f' }} />,
+                okText: 'Xác nhận',
+                cancelText: 'Hủy',
+                onOk: async () => {
+                    try {
+                        await requestToggleBlockUser({ userId: user.id });
+                        message.success({
+                            content: `Đã ${action} tài khoản thành công!`,
+                            icon: <CheckCircleOutlined style={{ color: '#d4af37' }} />,
+                        });
+                        fetchData(); // Refresh data after update
+                    } catch (error) {
+                        message.error(`Có lỗi xảy ra khi ${action} tài khoản!`);
+                    }
+                }
+            });
+        } catch (error) {
+            message.error('Có lỗi xảy ra!');
+        }
+    };
+
+    const handleDelete = async (user) => {
+        Modal.confirm({
+            title: 'Xác nhận xóa tài khoản',
+            content: (
+                <div>
+                    <p>Bạn có chắc chắn muốn xóa tài khoản của <strong>{user.name}</strong>?</p>
+                    <p style={{ color: '#ff4d4f', fontSize: '12px', marginTop: '8px' }}>
+                        <ExclamationCircleOutlined /> Lưu ý: Hành động này không thể hoàn tác!
+                    </p>
+                </div>
+            ),
+            icon: <ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />,
+            okText: 'Xóa',
+            cancelText: 'Hủy',
+            okButtonProps: { danger: true },
+            onOk: async () => {
+                try {
+                    await requestDeleteUser({ userId: user.id });
+                    message.success({
+                        content: 'Đã xóa tài khoản thành công!',
+                        icon: <CheckCircleOutlined style={{ color: '#d4af37' }} />,
+                    });
+                    fetchData(); // Refresh data after update
+                } catch (error) {
+                    message.error('Có lỗi xảy ra khi xóa tài khoản!');
+                }
+            }
+        });
     };
 
     const handleEditSubmit = async (values) => {
@@ -451,6 +601,10 @@ const UserManagement = () => {
         setFilterRole(value);
     };
 
+    const handleStatusFilterChange = (value) => {
+        setFilterStatus(value);
+    };
+
     const handleFilter = () => {
         let filtered = [...dataUsers];
         
@@ -468,6 +622,12 @@ const UserManagement = () => {
         if (filterRole !== 'all') {
             const isAdmin = filterRole === 'admin';
             filtered = filtered.filter(user => user.isAdmin === isAdmin);
+        }
+
+        // Apply status filter
+        if (filterStatus !== 'all') {
+            const isBlocked = filterStatus === 'blocked';
+            filtered = filtered.filter(user => user.isBlocked === isBlocked);
         }
         
         setFilteredUsers(filtered);
@@ -492,6 +652,7 @@ const UserManagement = () => {
         email: user.email,
         phone: user.phone,
         isAdmin: user.isAdmin,
+        isBlocked: user.isBlocked,
         avatar: user.avatar,
         address: user.address
     }));
@@ -600,6 +761,22 @@ const UserManagement = () => {
                         </div>
                         </motion.div>
                 </Col>
+                <Col xs={24} sm={12} md={6}>
+                        <motion.div 
+                            whileHover={{ y: -10, transition: { duration: 0.3 } }}
+                            className={cx('stat-card', 'blocked-card')}
+                        >
+                        <Statistic 
+                            title="Tài khoản bị khóa" 
+                            value={stats.blockedUsers} 
+                                prefix={<StopOutlined />} 
+                            loading={loading}
+                        />
+                        <div className={cx('stat-icon')}>
+                            <StopOutlined />
+                        </div>
+                        </motion.div>
+                </Col>
             </Row>
             </motion.div>
 
@@ -630,6 +807,17 @@ const UserManagement = () => {
                             <Select.Option value="all">Tất cả người dùng</Select.Option>
                             <Select.Option value="admin">Quản trị viên</Select.Option>
                             <Select.Option value="user">Người dùng thường</Select.Option>
+                        </Select>
+                        <Select
+                            defaultValue="all"
+                            value={filterStatus}
+                            onChange={handleStatusFilterChange}
+                            className={cx('status-filter')}
+                            suffixIcon={<FilterOutlined />}
+                        >
+                            <Select.Option value="all">Tất cả trạng thái</Select.Option>
+                            <Select.Option value="active">Hoạt động</Select.Option>
+                            <Select.Option value="blocked">Đã khóa</Select.Option>
                         </Select>
                         <Button 
                             icon={<ReloadOutlined />} 
@@ -676,7 +864,7 @@ const UserManagement = () => {
                             ) : (
                                 data.map(user => (
                                     <Col xs={24} sm={12} md={8} lg={6} key={user.id}>
-                                        <UserCard user={user} onEdit={handleEdit} />
+                                        <UserCard user={user} onEdit={handleEdit} onToggleBlock={handleToggleBlock} onDelete={handleDelete} />
                                     </Col>
                                 ))
                             )}

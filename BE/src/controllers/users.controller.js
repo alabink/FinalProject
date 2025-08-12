@@ -88,6 +88,12 @@ class controllerUsers {
         if (!user) {
             throw new BadRequestError('Tài khoản hoặc mật khẩu không chính xác');
         }
+        
+        // Kiểm tra tài khoản có bị khóa không
+        if (user.isBlocked) {
+            throw new BadRequestError('Tài khoản của bạn đã bị khóa, hãy liên hệ admin qua mail: techify.asia@gmail.com để có thể khiếu nại');
+        }
+        
         if (user.typeLogin === 'google') {
             throw new BadRequestError('Tài khoản đăng nhập bằng google');
         }
@@ -492,6 +498,76 @@ class controllerUsers {
         } catch (error) {
             console.error('Error in getAllUser:', error);
             throw new BadRequestError('Không thể lấy danh sách người dùng');
+        }
+    }
+
+    async toggleBlockUser(req, res) {
+        try {
+            const { userId } = req.body;
+            
+            if (!userId) {
+                throw new BadRequestError('ID người dùng là bắt buộc');
+            }
+
+            const user = await modelUser.findById(userId);
+            if (!user) {
+                throw new BadRequestError('Không tìm thấy người dùng');
+            }
+
+            // Không cho phép khóa tài khoản admin
+            if (user.isAdmin) {
+                throw new BadRequestError('Không thể khóa tài khoản quản trị viên');
+            }
+
+            // Toggle trạng thái khóa
+            const newBlockedStatus = !user.isBlocked;
+            await modelUser.updateOne({ _id: userId }, { isBlocked: newBlockedStatus });
+
+            const action = newBlockedStatus ? 'khóa' : 'mở khóa';
+            new OK({
+                message: `Đã ${action} tài khoản thành công`,
+                metadata: { isBlocked: newBlockedStatus }
+            }).send(res);
+        } catch (error) {
+            console.error('Error in toggleBlockUser:', error);
+            if (error instanceof BadRequestError) {
+                throw error;
+            }
+            throw new BadRequestError('Có lỗi xảy ra khi thay đổi trạng thái tài khoản');
+        }
+    }
+
+    async deleteUser(req, res) {
+        try {
+            const { userId } = req.body;
+            
+            if (!userId) {
+                throw new BadRequestError('ID người dùng là bắt buộc');
+            }
+
+            const user = await modelUser.findById(userId);
+            if (!user) {
+                throw new BadRequestError('Không tìm thấy người dùng');
+            }
+
+            // Không cho phép xóa tài khoản admin
+            if (user.isAdmin) {
+                throw new BadRequestError('Không thể xóa tài khoản quản trị viên');
+            }
+
+            // Xóa tài khoản
+            await modelUser.deleteOne({ _id: userId });
+
+            new OK({
+                message: 'Đã xóa tài khoản thành công',
+                metadata: { deleted: true }
+            }).send(res);
+        } catch (error) {
+            console.error('Error in deleteUser:', error);
+            if (error instanceof BadRequestError) {
+                throw error;
+            }
+            throw new BadRequestError('Có lỗi xảy ra khi xóa tài khoản');
         }
     }
 }

@@ -9,6 +9,7 @@ const modelUser = new Schema(
         password: { type: String, require: true },
         phone: { type: String, require: true },
         isAdmin: { type: Boolean, default: false },
+        isBlocked: { type: Boolean, default: false }, // Thêm trường để theo dõi trạng thái khóa tài khoản
         typeLogin: { type: String, enum: ['email', 'google'] },
         address: { type: String, require: true },
         avatar: { type: String, require: true },

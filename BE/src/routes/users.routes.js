@@ -210,6 +210,34 @@ router.post('/api/update-user', authAdmin, asyncHandler(controllerUsers.updateUs
 
 /**
  * @swagger
+ * /api/toggle-block-user:
+ *   post:
+ *     summary: Toggle block/unblock a user (admin only)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User block status toggled successfully
+ */
+router.post('/api/toggle-block-user', authAdmin, asyncHandler(controllerUsers.toggleBlockUser));
+
+/**
+ * @swagger
+ * /api/delete-user:
+ *   post:
+ *     summary: Delete a user (admin only)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User deleted successfully
+ */
+router.post('/api/delete-user', authAdmin, asyncHandler(controllerUsers.deleteUser));
+
+/**
+ * @swagger
  * /admin:
  *   get:
  *     summary: Authenticate an admin
