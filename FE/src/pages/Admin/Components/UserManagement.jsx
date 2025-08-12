@@ -696,28 +696,26 @@ const UserManagement = () => {
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
             >
-                <Row gutter={[16, 16]} justify="space-between">
-                    <Col xs={24} sm={12} md={4.8} lg={4.8} xl={4.8}>
-                        <motion.div 
-                            whileHover={{ y: -10, transition: { duration: 0.3 } }}
-                            className={cx('stat-card', 'total-card')}
-                        >
+                <div className={cx('stats-container')}>
+                    <motion.div 
+                        whileHover={{ y: -10, transition: { duration: 0.3 } }}
+                        className={cx('stat-card', 'total-card')}
+                    >
                         <Statistic 
                             title="Tổng người dùng" 
                             value={stats.total} 
-                                prefix={<SafetyCertificateOutlined />} 
+                            prefix={<SafetyCertificateOutlined />} 
                             loading={loading}
                         />
                         <div className={cx('stat-icon')}>
                             <TeamOutlined />
                         </div>
-                        </motion.div>
-                    </Col>
-                    <Col xs={24} sm={12} md={4.8} lg={4.8} xl={4.8}>
-                        <motion.div 
-                            whileHover={{ y: -10, transition: { duration: 0.3 } }}
-                            className={cx('stat-card', 'admin-card')}
-                        >
+                    </motion.div>
+                    
+                    <motion.div 
+                        whileHover={{ y: -10, transition: { duration: 0.3 } }}
+                        className={cx('stat-card', 'admin-card')}
+                    >
                         <Statistic 
                             title="Quản trị viên" 
                             value={stats.admins} 
@@ -727,13 +725,12 @@ const UserManagement = () => {
                         <div className={cx('stat-icon')}>
                             <CrownOutlined />
                         </div>
-                        </motion.div>
-                    </Col>
-                    <Col xs={24} sm={12} md={4.8} lg={4.8} xl={4.8}>
-                        <motion.div 
-                            whileHover={{ y: -10, transition: { duration: 0.3 } }}
-                            className={cx('stat-card', 'user-card')}
-                        >
+                    </motion.div>
+                    
+                    <motion.div 
+                        whileHover={{ y: -10, transition: { duration: 0.3 } }}
+                        className={cx('stat-card', 'user-card')}
+                    >
                         <Statistic 
                             title="Người dùng thường" 
                             value={stats.regularUsers} 
@@ -743,41 +740,38 @@ const UserManagement = () => {
                         <div className={cx('stat-icon')}>
                             <UserOutlined />
                         </div>
-                        </motion.div>
-                    </Col>
-                    <Col xs={24} sm={12} md={4.8} lg={4.8} xl={4.8}>
-                        <motion.div 
-                            whileHover={{ y: -10, transition: { duration: 0.3 } }}
-                            className={cx('stat-card', 'active-card')}
-                        >
+                    </motion.div>
+                    
+                    <motion.div 
+                        whileHover={{ y: -10, transition: { duration: 0.3 } }}
+                        className={cx('stat-card', 'active-card')}
+                    >
                         <Statistic 
                             title="Người dùng hoạt động" 
                             value={stats.activeUsers} 
-                                prefix={<ThunderboltOutlined />} 
+                            prefix={<ThunderboltOutlined />} 
                             loading={loading}
                         />
                         <div className={cx('stat-icon')}>
                             <CheckCircleOutlined />
                         </div>
-                        </motion.div>
-                    </Col>
-                    <Col xs={24} sm={12} md={4.8} lg={4.8} xl={4.8}>
-                        <motion.div 
-                            whileHover={{ y: -10, transition: { duration: 0.3 } }}
-                            className={cx('stat-card', 'blocked-card')}
-                        >
+                    </motion.div>
+                    
+                    <motion.div 
+                        whileHover={{ y: -10, transition: { duration: 0.3 } }}
+                        className={cx('stat-card', 'blocked-card')}
+                    >
                         <Statistic 
                             title="Tài khoản bị khóa" 
                             value={stats.blockedUsers} 
-                                prefix={<StopOutlined />} 
+                            prefix={<StopOutlined />} 
                             loading={loading}
                         />
                         <div className={cx('stat-icon')}>
                             <StopOutlined />
                         </div>
-                        </motion.div>
-                    </Col>
-                </Row>
+                    </motion.div>
+                </div>
             </motion.div>
 
             <motion.div
