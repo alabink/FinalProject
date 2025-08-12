@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Table, Tag, Tooltip, Button, Dropdown, Menu } from 'antd';
+import { Card, Table, Tag, Tooltip, Button, Dropdown, Menu, Radio, Space, Typography } from 'antd';
 import { 
     UserOutlined, 
     ShoppingCartOutlined, 
@@ -11,7 +11,9 @@ import {
     ReloadOutlined,
     CalendarOutlined,
     BarChartOutlined,
-    LineChartOutlined
+    LineChartOutlined,
+    ClockCircleOutlined,
+    CalendarOutlined as CalendarIcon
 } from '@ant-design/icons';
 import { Bar, Line } from 'react-chartjs-2';
 import {
@@ -29,6 +31,8 @@ import { requestGetAdminStats } from '../../../Config/request';
 import styles from './Dashboard.module.scss';
 import classNames from 'classnames/bind';
 
+const { Title: AntTitle } = Typography;
+
 const cx = classNames.bind(styles);
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, ChartTooltip, Legend);
@@ -40,17 +44,19 @@ const Dashboard = () => {
         processingOrders: 0,
         completedOrders: 0,
         todayRevenue: 0,
-        weeklyRevenue: [],
+        periodRevenue: [],
+        period: 'week',
         recentOrders: [],
     });
 
     const [chartType, setChartType] = useState('line');
     const [isLoading, setIsLoading] = useState(true);
+    const [selectedPeriod, setSelectedPeriod] = useState('week');
 
-    const fetchStats = async () => {
+    const fetchStats = async (period = selectedPeriod) => {
         setIsLoading(true);
         try {
-            const response = await requestGetAdminStats();
+            const response = await requestGetAdminStats(period);
             setStats(response.metadata);
         } catch (error) {
             console.error('Error fetching stats:', error);
@@ -61,16 +67,47 @@ const Dashboard = () => {
 
     useEffect(() => {
         fetchStats();
-        const interval = setInterval(fetchStats, 5 * 60 * 1000);
+        const interval = setInterval(() => fetchStats(), 5 * 60 * 1000);
         return () => clearInterval(interval);
     }, []);
 
+    const handlePeriodChange = (period) => {
+        setSelectedPeriod(period);
+        fetchStats(period);
+    };
+
+    const getPeriodTitle = () => {
+        switch (selectedPeriod) {
+            case 'day':
+                return 'Thống kê theo giờ hôm nay';
+            case 'week':
+                return 'Thống kê 7 ngày gần đây';
+            case 'month':
+                return `Thống kê tháng ${new Date().getMonth() + 1}/${new Date().getFullYear()}`;
+            default:
+                return 'Thống kê doanh thu và đơn hàng';
+        }
+    };
+
+    const getPeriodDescription = () => {
+        switch (selectedPeriod) {
+            case 'day':
+                return 'Hiển thị doanh thu và đơn hàng theo từng giờ trong ngày hôm nay';
+            case 'week':
+                return 'Hiển thị doanh thu và đơn hàng trong 7 ngày gần đây';
+            case 'month':
+                return `Hiển thị doanh thu và đơn hàng theo từng ngày trong tháng ${new Date().getMonth() + 1}`;
+            default:
+                return '';
+        }
+    };
+
     const revenueData = {
-        labels: stats.weeklyRevenue.map((day) => day.dayLabel),
+        labels: stats.periodRevenue.map((item) => item.label),
         datasets: [
             {
                 label: 'Doanh thu (VNĐ)',
-                data: stats.weeklyRevenue.map((day) => day.dailyRevenue),
+                data: stats.periodRevenue.map((item) => item.revenue),
                 backgroundColor: 'rgba(212, 175, 55, 0.15)',
                 borderColor: '#d4af37',
                 borderWidth: 2,
@@ -79,7 +116,7 @@ const Dashboard = () => {
             },
             {
                 label: 'Số đơn hàng',
-                data: stats.weeklyRevenue.map((day) => day.orderCount),
+                data: stats.periodRevenue.map((item) => item.orderCount),
                 backgroundColor: 'rgba(239, 68, 68, 0.1)',
                 borderColor: '#ef4444',
                 borderWidth: 2,
@@ -282,19 +319,44 @@ const Dashboard = () => {
 
             <div className={cx('chart-section')}>
                 <div className={cx('chart-header')}>
-                    <h3>Thống kê doanh thu và đơn hàng</h3>
+                    <div className={cx('chart-title-section')}>
+                        <AntTitle level={3} className={cx('chart-title')}>
+                            {getPeriodTitle()}
+                        </AntTitle>
+                        <Typography.Text type="secondary" className={cx('chart-description')}>
+                            {getPeriodDescription()}
+                        </Typography.Text>
+                    </div>
                     <div className={cx('chart-actions')}>
-                        <Tooltip title="Làm mới dữ liệu">
-                            <Button 
-                                icon={<ReloadOutlined />} 
-                                onClick={fetchStats}
-                                loading={isLoading}
-                                type="text"
-                            />
-                        </Tooltip>
-                        <Dropdown overlay={chartMenu} trigger={['click']}>
-                            <Button icon={<MoreOutlined />} type="text" />
-                        </Dropdown>
+                        <Space>
+                            <Radio.Group 
+                                value={selectedPeriod} 
+                                onChange={(e) => handlePeriodChange(e.target.value)}
+                                buttonStyle="solid"
+                                size="middle"
+                            >
+                                <Radio.Button value="day">
+                                    <ClockCircleOutlined /> Ngày
+                                </Radio.Button>
+                                <Radio.Button value="week">
+                                    <CalendarOutlined /> Tuần
+                                </Radio.Button>
+                                <Radio.Button value="month">
+                                    <CalendarIcon /> Tháng
+                                </Radio.Button>
+                            </Radio.Group>
+                            <Tooltip title="Làm mới dữ liệu">
+                                <Button 
+                                    icon={<ReloadOutlined />} 
+                                    onClick={() => fetchStats()}
+                                    loading={isLoading}
+                                    type="text"
+                                />
+                            </Tooltip>
+                            <Dropdown overlay={chartMenu} trigger={['click']}>
+                                <Button icon={<MoreOutlined />} type="text" />
+                            </Dropdown>
+                        </Space>
                     </div>
                 </div>
                 <div className={cx('chart-container')}>
@@ -346,6 +408,8 @@ const Dashboard = () => {
                                     color={
                                         status === 'Chờ xử lý'
                                             ? 'gold'
+                                            : status === 'Đã xác nhận'
+                                            ? 'blue'
                                             : status === 'Đang giao'
                                             ? 'blue'
                                             : status === 'Đã giao'

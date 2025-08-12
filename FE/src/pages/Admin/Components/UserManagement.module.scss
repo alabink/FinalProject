@@ -127,7 +127,6 @@
       align-items: stretch;
       gap: 16px;
       flex-wrap: nowrap; /* Đảm bảo không wrap xuống dòng */
-      overflow-x: auto; /* Cho phép scroll ngang nếu cần */
       
       /* Ẩn scrollbar nhưng vẫn cho phép scroll */
       &::-webkit-scrollbar {

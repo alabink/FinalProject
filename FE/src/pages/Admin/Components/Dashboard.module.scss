@@ -239,33 +239,80 @@
     .chart-header {
         display: flex;
         justify-content: space-between;
-        align-items: center;
+        align-items: flex-start;
         margin-bottom: 2.5rem;
+        flex-wrap: wrap;
+        gap: 1.5rem;
         
-        h3 {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: var(--text-color);
-            margin: 0;
-            letter-spacing: 0.3px;
-            font-family: var(--font-family);
-            position: relative;
-            padding-bottom: 0.8rem;
+        .chart-title-section {
+            flex: 1;
+            min-width: 300px;
             
-            &::after {
-                content: '';
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                width: 40px;
-                height: 2px;
-                background: var(--primary-color);
+            .chart-title {
+                font-size: 1.6rem !important;
+                font-weight: 700 !important;
+                color: var(--text-color) !important;
+                margin: 0 0 0.5rem 0 !important;
+                letter-spacing: 0.3px !important;
+                font-family: var(--font-family) !important;
+                position: relative !important;
+                padding-bottom: 0.8rem !important;
+                
+                &::after {
+                    content: '';
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    width: 40px;
+                    height: 2px;
+                    background: var(--primary-color);
+                }
+            }
+            
+            .chart-description {
+                font-size: 1rem !important;
+                color: var(--text-light) !important;
+                margin: 0 !important;
+                font-family: var(--font-family-content) !important;
+                line-height: 1.5 !important;
             }
         }
         
         .chart-actions {
             display: flex;
-            gap: 0.5rem;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+            
+            :global(.ant-radio-group) {
+                .ant-radio-button-wrapper {
+                    border: 1px solid rgba(212, 175, 55, 0.2);
+                    border-radius: 8px;
+                    font-weight: 600;
+                    font-family: var(--font-family-content);
+                    transition: var(--transition-base);
+                    
+                    &:not(:first-child)::before {
+                        display: none;
+                    }
+                    
+                    &:hover {
+                        border-color: var(--primary-color);
+                        color: var(--primary-color);
+                    }
+                    
+                    &.ant-radio-button-wrapper-checked {
+                        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+                        border-color: var(--primary-color);
+                        color: white;
+                        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+                    }
+                    
+                    .anticon {
+                        margin-right: 0.5rem;
+                    }
+                }
+            }
             
             button {
                 border: 1px solid rgba(212, 175, 55, 0.15);
@@ -576,6 +623,75 @@
         .highlight-badges {
             width: 100%;
             justify-content: space-between;
+        }
+    }
+}
+
+// Responsive styles
+@media (max-width: 1200px) {
+    .chart-header {
+        .chart-title-section {
+            min-width: 250px;
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .chart-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+        
+        .chart-title-section {
+            min-width: auto;
+            text-align: center;
+            
+            .chart-title::after {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+        }
+        
+        .chart-actions {
+            justify-content: center;
+            
+            :global(.ant-radio-group) {
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                
+                .ant-radio-button-wrapper {
+                    flex: 1;
+                    text-align: center;
+                    min-width: 80px;
+                }
+            }
+        }
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .chart-header {
+        .chart-actions {
+            :global(.ant-radio-group) {
+                flex-direction: column;
+                width: 100%;
+                
+                .ant-radio-button-wrapper {
+                    width: 100%;
+                    margin-bottom: 0.5rem;
+                }
+            }
         }
     }
 }

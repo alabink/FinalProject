@@ -370,6 +370,8 @@ class controllerUsers {
 
     async getAdminStats(req, res) {
         try {
+            const { period = 'week' } = req.query; // 'day', 'week', 'month'
+            
             // Lấy tổng số người dùng
             const totalUsers = await modelUser.countDocuments();
 
@@ -394,36 +396,94 @@ class controllerUsers {
 
             const todayRevenue = todayOrders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
 
-            // Tính doanh thu 7 ngày gần đây
-            const weeklyRevenue = [];
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                date.setHours(0, 0, 0, 0);
-                
-                const nextDay = new Date(date);
-                nextDay.setDate(nextDay.getDate() + 1);
+            // Tính doanh thu theo period
+            let periodRevenue = [];
+            let periodOrders = [];
+            
+            if (period === 'day') {
+                // Thống kê theo giờ trong ngày hôm nay
+                for (let i = 0; i < 24; i++) {
+                    const startHour = new Date(today);
+                    startHour.setHours(i, 0, 0, 0);
+                    const endHour = new Date(today);
+                    endHour.setHours(i + 1, 0, 0, 0);
 
-                const dayOrders = allOrders.filter(order => {
-                    const orderDate = new Date(order.createdAt);
-                    return orderDate >= date && orderDate < nextDay;
-                });
+                    const hourOrders = allOrders.filter(order => {
+                        const orderDate = new Date(order.createdAt);
+                        return orderDate >= startHour && orderDate < endHour;
+                    });
 
-                const dailyRevenue = dayOrders
-                    .filter(order => order.statusOrder === 'delivered')
-                    .reduce((sum, order) => sum + (order.totalPrice || 0), 0);
+                    const hourlyRevenue = hourOrders
+                        .filter(order => order.statusOrder === 'delivered')
+                        .reduce((sum, order) => sum + (order.totalPrice || 0), 0);
 
-                const orderCount = dayOrders.length;
+                    const orderCount = hourOrders.length;
 
-                weeklyRevenue.push({
-                    dayLabel: date.toLocaleDateString('vi-VN', { 
-                        weekday: 'short', 
-                        month: 'short', 
-                        day: 'numeric' 
-                    }),
-                    dailyRevenue,
-                    orderCount
-                });
+                    periodRevenue.push({
+                        label: `${i.toString().padStart(2, '0')}:00`,
+                        revenue: hourlyRevenue,
+                        orderCount
+                    });
+                }
+            } else if (period === 'week') {
+                // Thống kê 7 ngày gần đây
+                for (let i = 6; i >= 0; i--) {
+                    const date = new Date();
+                    date.setDate(date.getDate() - i);
+                    date.setHours(0, 0, 0, 0);
+                    
+                    const nextDay = new Date(date);
+                    nextDay.setDate(nextDay.getDate() + 1);
+
+                    const dayOrders = allOrders.filter(order => {
+                        const orderDate = new Date(order.createdAt);
+                        return orderDate >= date && orderDate < nextDay;
+                    });
+
+                    const dailyRevenue = dayOrders
+                        .filter(order => order.statusOrder === 'delivered')
+                        .reduce((sum, order) => sum + (order.totalPrice || 0), 0);
+
+                    const orderCount = dayOrders.length;
+
+                    periodRevenue.push({
+                        label: date.toLocaleDateString('vi-VN', { 
+                            weekday: 'short', 
+                            month: 'short', 
+                            day: 'numeric' 
+                        }),
+                        revenue: dailyRevenue,
+                        orderCount
+                    });
+                }
+            } else if (period === 'month') {
+                // Thống kê theo ngày trong tháng hiện tại
+                const currentMonth = new Date();
+                const year = currentMonth.getFullYear();
+                const month = currentMonth.getMonth();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const startOfDay = new Date(year, month, day, 0, 0, 0, 0);
+                    const endOfDay = new Date(year, month, day + 1, 0, 0, 0, 0);
+
+                    const dayOrders = allOrders.filter(order => {
+                        const orderDate = new Date(order.createdAt);
+                        return orderDate >= startOfDay && orderDate < endOfDay;
+                    });
+
+                    const dailyRevenue = dayOrders
+                        .filter(order => order.statusOrder === 'delivered')
+                        .reduce((sum, order) => sum + (order.totalPrice || 0), 0);
+
+                    const orderCount = dayOrders.length;
+
+                    periodRevenue.push({
+                        label: `${day.toString().padStart(2, '0')}/${(month + 1).toString().padStart(2, '0')}`,
+                        revenue: dailyRevenue,
+                        orderCount
+                    });
+                }
             }
 
             // Lấy 10 đơn hàng gần đây nhất với thông tin sản phẩm
@@ -473,7 +533,8 @@ class controllerUsers {
                 processingOrders,
                 completedOrders,
                 todayRevenue,
-                weeklyRevenue,
+                periodRevenue,
+                period,
                 recentOrders: recentOrdersWithProducts
             };
 

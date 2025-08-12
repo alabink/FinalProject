@@ -210,8 +210,8 @@ export const requestUploadImage = async (data) => {
     return res.data;
 };
 
-export const requestGetAdminStats = async () => {
-    const res = await request.get('/api/get-admin-stats');
+export const requestGetAdminStats = async (period = 'week') => {
+    const res = await request.get('/api/get-admin-stats', { params: { period } });
     return res.data;
 };
 
