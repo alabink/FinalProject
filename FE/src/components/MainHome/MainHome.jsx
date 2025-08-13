@@ -208,8 +208,8 @@ function MainHome() {
             >
                 <div className={cx('container')}>
                     <motion.div className={cx('section-header')} variants={itemVariants}>
-                        <h2>🔥 Sản phẩm hot nhất</h2>
-                        <p>Những sản phẩm được yêu thích nhất tại Techify</p>
+                        <h2>🔥 Sản phẩm theo danh mục</h2>
+                        <p>Những sản phẩm hiện có tại Techify</p>
                     </motion.div>
                 </div>
                 
