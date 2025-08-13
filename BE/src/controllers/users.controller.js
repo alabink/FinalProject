@@ -3,6 +3,10 @@ const modelPayments = require('../models/payments.model');
 const modelProduct = require('../models/products.model');
 const modelApiKey = require('../models/apiKey.model');
 const modelOtp = require('../models/otp.model');
+const modelCart = require('../models/cart.model');
+const modelComment = require('../models/comment.model');
+const modelUserInteraction = require('../models/userInteraction.model');
+const modelProductPreview = require('../models/productPreview.model');
 
 const { BadRequestError } = require('../core/error.response');
 const { createApiKey, createToken, createRefreshToken, verifyToken } = require('../services/tokenSevices');
@@ -621,12 +625,60 @@ class controllerUsers {
                 throw new BadRequestError('Không thể xóa tài khoản quản trị viên');
             }
 
-            // Xóa tài khoản
+            // Xóa tất cả dữ liệu liên quan đến user trước khi xóa user
+            // Sử dụng Promise.all để xóa song song, tăng hiệu suất
+            const deleteResults = await Promise.all([
+                // 1. Xóa tất cả đơn hàng của user
+                modelPayments.deleteMany({ userId: userId }),
+                // 2. Xóa giỏ hàng của user
+                modelCart.deleteMany({ userId: userId }),
+                // 3. Xóa bình luận của user
+                modelComment.deleteMany({ userId: userId }),
+                // 4. Xóa tương tác người dùng với sản phẩm
+                modelUserInteraction.deleteMany({ userId: userId }),
+                // 5. Xóa đánh giá sản phẩm của user
+                modelProductPreview.deleteMany({ userId: userId }),
+                // 6. Xóa API key của user
+                modelApiKey.deleteMany({ userId: userId }),
+                // 7. Xóa OTP của user
+                modelOtp.deleteMany({ userId: userId })
+            ]);
+
+            // Kiểm tra xem có lỗi nào xảy ra trong quá trình xóa không
+            const hasErrors = deleteResults.some(result => !result || result.deletedCount === undefined);
+            if (hasErrors) {
+                throw new BadRequestError('Có lỗi xảy ra trong quá trình xóa dữ liệu liên quan');
+            }
+
+            // Log kết quả xóa để theo dõi
+            console.log(`Đã xóa dữ liệu của user ${userId}:`, {
+                orders: deleteResults[0].deletedCount,
+                cart: deleteResults[1].deletedCount,
+                comments: deleteResults[2].deletedCount,
+                interactions: deleteResults[3].deletedCount,
+                productPreviews: deleteResults[4].deletedCount,
+                apiKeys: deleteResults[5].deletedCount,
+                otp: deleteResults[6].deletedCount
+            });
+
+            // Cuối cùng xóa user
             await modelUser.deleteOne({ _id: userId });
 
             new OK({
-                message: 'Đã xóa tài khoản thành công',
-                metadata: { deleted: true }
+                message: 'Đã xóa tài khoản và tất cả dữ liệu liên quan thành công',
+                metadata: { 
+                    deleted: true,
+                    deletedCounts: {
+                        orders: deleteResults[0].deletedCount,
+                        cart: deleteResults[1].deletedCount,
+                        comments: deleteResults[2].deletedCount,
+                        interactions: deleteResults[3].deletedCount,
+                        productPreviews: deleteResults[4].deletedCount,
+                        apiKeys: deleteResults[5].deletedCount,
+                        otp: deleteResults[6].deletedCount
+                    },
+                    message: `Đã xóa ${deleteResults[0].deletedCount} đơn hàng, ${deleteResults[1].deletedCount} giỏ hàng, ${deleteResults[2].deletedCount} bình luận, ${deleteResults[3].deletedCount} tương tác, ${deleteResults[4].deletedCount} đánh giá sản phẩm, ${deleteResults[5].deletedCount} API keys, ${deleteResults[6].deletedCount} mã OTP`
+                }
             }).send(res);
         } catch (error) {
             console.error('Error in deleteUser:', error);
