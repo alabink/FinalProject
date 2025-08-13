@@ -66,7 +66,7 @@ Dự án này kết hợp **React + Node.js + Python** và cơ sở dữ liệu 
 
 ## 🖼️ Giao Diện Website
 <p align="center">
-  <img src="https://via.placeholder.com/1200x700.png?text=Techify+Homepage" alt="Homepage Screenshot" style="border-radius: 15px; box-shadow: 0px 4px 15px rgba(0,0,0,0.2)"/>
+  <img width="1916" height="944" alt="anhgiaodien" src="https://github.com/user-attachments/assets/99e9f8fd-91fa-4d04-990e-4bc063e8f570" alt="Homepage Screenshot" style="border-radius: 15px; box-shadow: 0px 4px 15px rgba(0,0,0,0.2)"/>
 </p>
 
 ---
