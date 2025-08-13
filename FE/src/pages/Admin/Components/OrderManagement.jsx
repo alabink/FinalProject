@@ -107,7 +107,7 @@ const OrderManagement = () => {
     const paymentMethods = [
         { label: 'COD', value: 'COD', color: 'green' },
         { label: 'MOMO', value: 'MOMO', color: 'pink' },
-        { label: 'Ngân hàng', value: 'BANK', color: 'blue' }
+        { label: 'VNPAY', value: 'VNPAY', color: 'blue' }
     ];
 
     const handleShowModal = (order) => {
@@ -215,6 +215,7 @@ const OrderManagement = () => {
                     switch(type) {
                         case 'COD': return <ShoppingCartOutlined />;
                         case 'MOMO': return <DollarOutlined />;
+                        case 'VNPAY': return <DollarOutlined />;
                         default: return <DollarOutlined />;
                     }
                 };
@@ -222,7 +223,7 @@ const OrderManagement = () => {
                 return (
                     <Tag 
                         icon={getPaymentIcon()} 
-                        color={type === 'COD' ? 'gold' : type === 'MOMO' ? 'pink' : 'blue'}
+                        color={type === 'COD' ? 'gold' : type === 'MOMO' ? 'pink' : type === 'VNPAY' ? 'blue' : 'default'}
                         className={cx('payment-tag')}
                     >
                         {type}
@@ -354,7 +355,7 @@ const OrderManagement = () => {
             revenue: 0,
             cod: 0,
             momo: 0,
-            bank: 0
+            vnpay: 0
         };
 
         orderData.forEach(order => {
@@ -369,7 +370,7 @@ const OrderManagement = () => {
             // Đếm theo phương thức thanh toán
             if (order.typePayments === 'COD') stats.cod++;
             else if (order.typePayments === 'MOMO') stats.momo++;
-            else stats.bank++;
+            else if (order.typePayments === 'VNPAY') stats.vnpay++;
         });
 
         setStatistics(stats);

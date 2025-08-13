@@ -385,7 +385,8 @@ const ModalDetailOrder = ({ isModalVisible, setIsModalVisible, selectedOrder }) 
                                             <Tag 
                                                 color={
                                                     order?.findPayment?.typePayments === 'COD' ? 'gold' : 
-                                                    order?.findPayment?.typePayments === 'MOMO' ? 'pink' : 'blue'
+                                                    order?.findPayment?.typePayments === 'MOMO' ? 'pink' : 
+                                                    order?.findPayment?.typePayments === 'VNPAY' ? 'blue' : 'default'
                                                 }
                                             >
                                                 {order?.findPayment?.typePayments}
