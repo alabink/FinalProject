@@ -137,13 +137,33 @@ function Category() {
             }
     }, [compareIds]);
 
+    const applyResponse = (res) => {
+        if (!res || !res.metadata) {
+            setDataProduct([]);
+            setTotal(0);
+            return;
+        }
+        // Support both new (object) and old (array) response shapes
+        if (Array.isArray(res.metadata)) {
+            const start = (page - 1) * limit;
+            const items = res.metadata.slice(start, start + limit);
+            setDataProduct(items);
+            setTotal(res.metadata.length);
+            setCategoryName(items[0]?.category?.nameCategory || '');
+        } else {
+            const items = res.metadata.items || [];
+            setDataProduct(items);
+            setTotal(res.metadata.total || items.length || 0);
+            setCategoryName(items[0]?.category?.nameCategory || '');
+        }
+    };
+
     const handlePriceRange = async (range) => {
         try {
             setLoading(true);
             const res = await requestFilterProduct({ priceRange: range, categoryId: id, page: 1, limit });
             setPage(1);
-            setDataProduct(res.metadata.items || []);
-            setTotal(res.metadata.total || 0);
+            applyResponse(res);
         } catch (error) {
             console.error('Error filtering products:', error);
         } finally {
@@ -157,8 +177,7 @@ function Category() {
             const pricedes = value === 'jack' ? 'desc' : 'asc';
             const res = await requestFilterProduct({ pricedes, categoryId: id, page: 1, limit });
             setPage(1);
-            setDataProduct(res.metadata.items || []);
-            setTotal(res.metadata.total || 0);
+            applyResponse(res);
         } catch (error) {
             console.error('Error sorting products:', error);
         } finally {
@@ -182,10 +201,7 @@ function Category() {
             try {
                 setLoading(true);
                 const res = await requestFilterProduct({ categoryId: id, page, limit });
-                const items = res.metadata?.items || [];
-                setDataProduct(items);
-                setTotal(res.metadata?.total || 0);
-                setCategoryName(items[0]?.category?.nameCategory || '');
+                applyResponse(res);
             } catch (error) {
                 console.error('Error fetching products:', error);
             } finally {
