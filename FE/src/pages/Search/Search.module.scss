@@ -187,6 +187,32 @@
     .ant-col {
         padding: 0 8px;
         margin-bottom: 24px;
+        
+        // Tối ưu cho hiển thị 8 sản phẩm trên 1 dòng
+        @media (min-width: 1200px) {
+            flex: 0 0 12.5%; // 100% / 8 = 12.5%
+            max-width: 12.5%;
+        }
+        
+        @media (min-width: 992px) and (max-width: 1199px) {
+            flex: 0 0 16.666667%; // 100% / 6 = 16.666667%
+            max-width: 16.666667%;
+        }
+        
+        @media (min-width: 768px) and (max-width: 991px) {
+            flex: 0 0 25%; // 100% / 4 = 25%
+            max-width: 25%;
+        }
+        
+        @media (min-width: 576px) and (max-width: 767px) {
+            flex: 0 0 33.333333%; // 100% / 3 = 33.333333%
+            max-width: 33.333333%;
+        }
+        
+        @media (max-width: 575px) {
+            flex: 0 0 50%; // 100% / 2 = 50%
+            max-width: 50%;
+        }
     }
 }
 
@@ -351,6 +377,26 @@
     .suggestion-grid {
         grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
         gap: 12px;
+    }
+}
+
+// Tối ưu cho layout 8 sản phẩm trên 1 dòng
+@media (min-width: 1200px) {
+    .search-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 24px 40px 24px;
+    }
+    
+    .results-grid {
+        .ant-row {
+            margin: 0 -8px;
+        }
+        
+        .ant-col {
+            padding: 0 8px;
+            margin-bottom: 20px;
+        }
     }
 }
 

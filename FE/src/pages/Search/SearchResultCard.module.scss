@@ -30,10 +30,23 @@
 .image-container {
     position: relative;
     width: 100%;
-    height: 380px;
+    height: 280px; // Giảm chiều cao để phù hợp với layout 8 sản phẩm
     overflow: hidden;
     background: #f5f5f5;
     border-radius: 12px 12px 0 0;
+    
+    // Responsive cho các màn hình khác nhau
+    @media (min-width: 1200px) {
+        height: 220px; // Cho màn hình lớn hiển thị 8 sản phẩm
+    }
+    
+    @media (min-width: 992px) and (max-width: 1199px) {
+        height: 240px; // Cho màn hình trung bình hiển thị 6 sản phẩm
+    }
+    
+    @media (min-width: 768px) and (max-width: 991px) {
+        height: 260px; // Cho màn hình nhỏ hiển thị 4 sản phẩm
+    }
 }
 
 .product-image {
@@ -48,23 +61,43 @@
 }
 
 .product-info {
-    padding: 20px;
+    padding: 16px;
     flex: 1;
     display: flex;
     flex-direction: column;
+    
+    // Responsive padding cho layout mới
+    @media (min-width: 1200px) {
+        padding: 12px;
+    }
+    
+    @media (max-width: 575px) {
+        padding: 16px;
+    }
 }
 
 .product-name {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
     color: #333;
-    margin: 0 0 12px 0;
-    line-height: 1.4;
+    margin: 0 0 10px 0;
+    line-height: 1.3;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     min-height: auto;
+    
+    // Responsive font size cho layout mới
+    @media (min-width: 1200px) {
+        font-size: 14px;
+        margin: 0 0 8px 0;
+    }
+    
+    @media (max-width: 575px) {
+        font-size: 16px;
+        margin: 0 0 10px 0;
+    }
 }
 
 .brand-name {
@@ -99,10 +132,10 @@
 
 .action-buttons {
     position: absolute;
-    bottom: 20px;
-    right: 20px;
+    bottom: 16px;
+    right: 16px;
     display: flex;
-    gap: 8px;
+    gap: 6px;
     opacity: 0;
     transform: translateY(10px);
     transition: all 0.3s ease;
@@ -111,22 +144,48 @@
         opacity: 1;
         transform: translateY(0);
     }
+    
+    // Responsive cho layout mới
+    @media (min-width: 1200px) {
+        bottom: 12px;
+        right: 12px;
+        gap: 4px;
+    }
+    
+    @media (max-width: 575px) {
+        bottom: 16px;
+        right: 16px;
+        gap: 6px;
+    }
 }
 
 .action-btn {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     border: none;
     background: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 16px;
     color: #666;
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    
+    // Responsive cho layout mới
+    @media (min-width: 1200px) {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+    
+    @media (max-width: 575px) {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+    }
     
     &:hover {
         transform: scale(1.1);

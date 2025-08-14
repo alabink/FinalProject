@@ -18,7 +18,7 @@ function Search() {
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [total, setTotal] = useState(0);
-    const pageSize = 16;
+    const pageSize = 24; // Tăng pageSize để hiển thị nhiều sản phẩm hơn với layout mới
 
     const searchQuery = searchParams.get('q') || '';
 
@@ -163,9 +163,9 @@ function Search() {
                                     initial="hidden"
                                     animate="visible"
                                 >
-                                    <Row gutter={[24, 32]}>
+                                    <Row gutter={[16, 24]}>
                                         {paginatedResults.map((product, index) => (
-                                            <Col key={product._id} xs={24} sm={12} md={12} lg={8}>
+                                            <Col key={product._id} xs={12} sm={8} md={6} lg={3} xl={3}>
                                                 <SearchResultCard 
                                                     product={product} 
                                                     index={index}
