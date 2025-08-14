@@ -30,22 +30,22 @@
 .image-container {
     position: relative;
     width: 100%;
-    height: 280px; // Giảm chiều cao để phù hợp với layout 8 sản phẩm
+    height: 320px; // Tăng chiều cao để phù hợp với layout 6 sản phẩm
     overflow: hidden;
     background: #f5f5f5;
     border-radius: 12px 12px 0 0;
     
     // Responsive cho các màn hình khác nhau
     @media (min-width: 1200px) {
-        height: 220px; // Cho màn hình lớn hiển thị 8 sản phẩm
+        height: 280px; // Cho màn hình lớn hiển thị 6 sản phẩm
     }
     
     @media (min-width: 992px) and (max-width: 1199px) {
-        height: 240px; // Cho màn hình trung bình hiển thị 6 sản phẩm
+        height: 280px; // Cho màn hình trung bình hiển thị 6 sản phẩm
     }
     
     @media (min-width: 768px) and (max-width: 991px) {
-        height: 260px; // Cho màn hình nhỏ hiển thị 4 sản phẩm
+        height: 300px; // Cho màn hình nhỏ hiển thị 4 sản phẩm
     }
 }
 
@@ -61,52 +61,61 @@
 }
 
 .product-info {
-    padding: 16px;
+    padding: 18px;
     flex: 1;
     display: flex;
     flex-direction: column;
     
     // Responsive padding cho layout mới
     @media (min-width: 1200px) {
-        padding: 12px;
+        padding: 16px;
     }
     
     @media (max-width: 575px) {
-        padding: 16px;
+        padding: 18px;
     }
 }
 
 .product-name {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
     color: #333;
-    margin: 0 0 10px 0;
-    line-height: 1.3;
+    margin: 0 0 12px 0;
+    line-height: 1.4;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 1; // Chỉ hiển thị 1 dòng để tên sản phẩm không bị cắt
     -webkit-box-orient: vertical;
     overflow: hidden;
     min-height: auto;
     
     // Responsive font size cho layout mới
     @media (min-width: 1200px) {
-        font-size: 14px;
-        margin: 0 0 8px 0;
+        font-size: 16px;
+        margin: 0 0 10px 0;
     }
     
     @media (max-width: 575px) {
-        font-size: 16px;
-        margin: 0 0 10px 0;
+        font-size: 18px;
+        margin: 0 0 12px 0;
     }
 }
 
 .brand-name {
-    font-size: 14px;
+    font-size: 15px;
     color: #888;
     text-transform: uppercase;
     font-weight: 500;
     margin-bottom: 12px;
     letter-spacing: 0.5px;
+    
+    // Responsive cho layout mới
+    @media (min-width: 1200px) {
+        font-size: 14px;
+    }
+    
+    @media (max-width: 575px) {
+        font-size: 15px;
+    }
 }
 
 .price-info {
@@ -124,10 +133,19 @@
 }
 
 .current-price {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
     color: #e74c3c;
     order: 2;
+    
+    // Responsive cho layout mới
+    @media (min-width: 1200px) {
+        font-size: 20px;
+    }
+    
+    @media (max-width: 575px) {
+        font-size: 22px;
+    }
 }
 
 .action-buttons {

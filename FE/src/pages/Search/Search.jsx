@@ -163,9 +163,9 @@ function Search() {
                                     initial="hidden"
                                     animate="visible"
                                 >
-                                    <Row gutter={[16, 24]}>
+                                    <Row gutter={[20, 24]}>
                                         {paginatedResults.map((product, index) => (
-                                            <Col key={product._id} xs={12} sm={8} md={6} lg={3} xl={3}>
+                                            <Col key={product._id} xs={12} sm={8} md={6} lg={4} xl={4}>
                                                 <SearchResultCard 
                                                     product={product} 
                                                     index={index}
