@@ -338,6 +338,9 @@ class controllerProducts {
 
 async filterProduct(req, res) {
     const { categoryId, priceRange, pricedes } = req.query;
+    const page = Math.max(parseInt(req.query.page || '1', 10), 1);
+    const limit = Math.max(parseInt(req.query.limit || '20', 10), 1);
+
     let query = {};
 
     if (categoryId) {
@@ -349,9 +352,7 @@ async filterProduct(req, res) {
 
         if (priceRange === 'under20') {
             orClauses.push(
-                // priceDiscount > 0 và < 20tr
                 { priceDiscount: { $gt: 0, $lt: 20000000 } },
-                // priceDiscount = 0/null và price < 20tr
                 {
                     $and: [
                         { $or: [{ priceDiscount: 0 }, { priceDiscount: null }] },
@@ -386,8 +387,10 @@ async filterProduct(req, res) {
         }
     }
 
-    let products = await modelProduct.find(query);
+    // Populate category so FE can read category name
+    let products = await modelProduct.find(query).populate('category');
 
+    // Sort by effective price if requested
     if (pricedes) {
         products = products.sort((a, b) => {
             const priceA = a.priceDiscount > 0 ? a.priceDiscount : a.price;
@@ -396,9 +399,19 @@ async filterProduct(req, res) {
         });
     }
 
+    const total = products.length;
+    const startIndex = (page - 1) * limit;
+    const paginated = products.slice(startIndex, startIndex + limit);
+
     new OK({
         message: 'Lọc sản phẩm thành công',
-        metadata: products,
+        metadata: {
+            items: paginated,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+        },
     }).send(res);
 }
 /// moi fix ne

@@ -3,7 +3,7 @@ import styles from './Category.module.scss';
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
 
-import { Select, Spin, message, Result, Button } from 'antd';
+import { Select, Spin, message, Result, Button, Pagination } from 'antd';
 import CardBody from '../../components/CardBody/CardBody';
 import { useEffect, useRef, useState } from 'react';
 import request, { requestFilterProduct } from '../../Config/request';
@@ -25,6 +25,9 @@ function Category() {
     const [dataProduct, setDataProduct] = useState([]);
     const [loading, setLoading] = useState(true);
     const [categoryName, setCategoryName] = useState('');
+    const [page, setPage] = useState(1);
+    const [limit] = useState(20);
+    const [total, setTotal] = useState(0);
 
     const [compareIds, setCompareIds] = useState([]);
     const [compareHTML, setCompareHTML] = useState('');
@@ -137,8 +140,10 @@ function Category() {
     const handlePriceRange = async (range) => {
         try {
             setLoading(true);
-            const res = await requestFilterProduct({ priceRange: range, categoryId: id });
-            setDataProduct(res.metadata);
+            const res = await requestFilterProduct({ priceRange: range, categoryId: id, page: 1, limit });
+            setPage(1);
+            setDataProduct(res.metadata.items || []);
+            setTotal(res.metadata.total || 0);
         } catch (error) {
             console.error('Error filtering products:', error);
         } finally {
@@ -150,8 +155,10 @@ function Category() {
         try {
             setLoading(true);
             const pricedes = value === 'jack' ? 'desc' : 'asc';
-            const res = await requestFilterProduct({ pricedes, categoryId: id });
-            setDataProduct(res.metadata);
+            const res = await requestFilterProduct({ pricedes, categoryId: id, page: 1, limit });
+            setPage(1);
+            setDataProduct(res.metadata.items || []);
+            setTotal(res.metadata.total || 0);
         } catch (error) {
             console.error('Error sorting products:', error);
         } finally {
@@ -167,15 +174,18 @@ function Category() {
         setCompareHTML('');
         setIsComparisonActive(false);
         setComparisonError(null);
+        setPage(1);
     }, [id]);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                const res = await requestFilterProduct({ categoryId: id });
-                setDataProduct(res.metadata);
-                setCategoryName(res.metadata[0]?.category?.nameCategory || '');
+                const res = await requestFilterProduct({ categoryId: id, page, limit });
+                const items = res.metadata?.items || [];
+                setDataProduct(items);
+                setTotal(res.metadata?.total || 0);
+                setCategoryName(items[0]?.category?.nameCategory || '');
             } catch (error) {
                 console.error('Error fetching products:', error);
             } finally {
@@ -183,7 +193,12 @@ function Category() {
             }
         };
         fetchData();
-    }, [id]); // reload when category changes
+    }, [id, page, limit]); // reload when category or page changes
+
+    const handlePageChange = (p) => {
+        setPage(p);
+        window.scrollTo({ top: document.querySelector(`.${cx('inner')}`).offsetTop - 100, behavior: 'smooth' });
+    };
 
     const renderProductCard = (item) => {
         const isSelected = compareIds.includes(item._id);
@@ -327,7 +342,7 @@ function Category() {
                             <p>Đang tải sản phẩm...</p>
                         </div>
                     ) : (
-                        <div className={cx('product-list')}>
+                    <div className={cx('product-list')}>
                             {dataProduct.length > 0 ? (
                                 dataProduct.map((item) => renderProductCard(item))
                             ) : (
@@ -335,6 +350,11 @@ function Category() {
                                     <p>Không có sản phẩm nào trong danh mục này</p>
                                 </div>
                             )}
+                        </div>
+                    )}
+                    {!loading && total > limit && (
+                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24 }}>
+                            <Pagination current={page} pageSize={limit} total={total} onChange={handlePageChange} showSizeChanger={false} />
                         </div>
                     )}
                 </div>
